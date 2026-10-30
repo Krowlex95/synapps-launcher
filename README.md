@@ -2,14 +2,22 @@
   <img src="public/logo.png" alt="Synapps Logo" width="96" height="96" />
   <h1>Synapps Launcher</h1>
   <p><strong>Central open-source para instalar, atualizar e iniciar ferramentas criativas de Design, Mídia, Escritório, 3D e Desenvolvimento.</strong></p>
+  <p><em>✨ Projeto <strong>100% Vibe Coded</strong> com IA ✨</em></p>
 
   <p>
     <a href="./LICENSE"><img src="https://img.shields.io/badge/Licen%C3%A7a-GPLv3-blue.svg" alt="License: GPL v3" /></a>
+    <img src="https://img.shields.io/badge/100%25-Vibe_Coded-8b5cf6?style=flat&logo=sparkles&logoColor=white" alt="100% Vibe Coded" />
     <img src="https://img.shields.io/badge/Tauri-2.x-24C8DB?logo=tauri&logoColor=white" alt="Tauri 2.x" />
     <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React 19" />
     <img src="https://img.shields.io/badge/Rust-Edition_2021-orange?logo=rust" alt="Rust" />
   </p>
 </div>
+
+---
+
+## 🤖 Sobre o Projeto (100% Vibe Coded)
+
+O **Synapps Launcher** foi construído de ponta a ponta como um projeto **100% Vibe Coded** — toda a arquitetura em Rust (Tauri 2.x), interface gráfica em React 19 + Tailwind CSS v4, motor de temas modulares, integração com repositórios/mirrors e empacotamento Windows NSIS foram desenvolvidos iterativamente através de programação guiada por IA.
 
 ---
 

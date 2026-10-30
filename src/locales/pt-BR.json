@@ -1,0 +1,342 @@
+{
+  "sidebar": {
+    "home": "Início",
+    "all": "Todos",
+    "news": "Notícias",
+    "design": "Design",
+    "media": "Mídia",
+    "office": "Escritório",
+    "threeD": "3D",
+    "dev": "Dev",
+    "settings": "Configurações",
+    "subtitle": "Suíte criativa",
+    "categoriesSection": "Categorias",
+    "developersSection": "Desenvolvedoras",
+    "developerSubtitle": "Aplicativos desenvolvidos por {{developer}}.",
+    "collapse": "Recolher barra lateral",
+    "expand": "Expandir barra lateral"
+  },
+  "news": {
+    "title": "Notícias e Atualizações",
+    "subtitle": "Acompanhe as novidades, versões recentes e notas de lançamento dos aplicativos.",
+    "allApps": "Todos os apps",
+    "installedOnly": "Apenas instalados",
+    "whatsNew": "O que mudou nesta versão",
+    "loadingNotes": "Carregando notas da versão...",
+    "showMore": "Ver notas completas",
+    "showLess": "Recolher notas",
+    "releasedOn": "Lançado em {{date}}",
+    "latestRelease": "Versão mais recente",
+    "noInstalledNews": "Nenhum aplicativo instalado ainda para filtrar notícias.",
+    "defaultHighlights": "Melhorias de estabilidade, otimizações de desempenho para Windows x64 e correções de interface."
+  },
+  "app": {
+    "install": "Instalar",
+    "open": "Abrir",
+    "update": "Atualizar",
+    "uninstall": "Desinstalar",
+    "installing": "Instalando",
+    "downloading": "Baixando",
+    "comingSoon": "Em breve",
+    "installed": "Instalado",
+    "updateAvailable": "Atualização disponível",
+    "notInstalled": "Não instalado",
+    "version": "Versão",
+    "searchPlaceholder": "Buscar aplicativos...",
+    "empty": "Nenhum aplicativo encontrado.",
+    "loading": "Sincronizando aplicativos...",
+    "openFolder": "Abrir local de instalação",
+    "installFailed": "Não foi possível instalar o aplicativo.",
+    "uninstallFailed": "Não foi possível desinstalar o aplicativo.",
+    "launchFailed": "Não foi possível abrir o aplicativo.",
+    "releaseNotes": "Notas da versão",
+    "noDescription": "Ferramenta criativa da Craft App Suite.",
+    "updateLauncher": "Atualizar launcher",
+    "appCount": "{{count}} aplicativos",
+    "filter": "Filtrar",
+    "clearFilters": "Limpar filtros",
+    "filterByCategory": "Categorias",
+    "filterByDeveloper": "Desenvolvedoras"
+  },
+  "settings": {
+    "title": "Configurações",
+    "appearance": "Aparência",
+    "theme": "Tema",
+    "themeLight": "Claro",
+    "themeDark": "Escuro",
+    "themeSystem": "Sistema",
+    "accentColor": "Cor de destaque",
+    "sidebarIconColor": "Cor dos ícones da barra lateral",
+    "installDir": "Diretório de instalação",
+    "changeDir": "Alterar",
+    "githubToken": "Token do GitHub",
+    "language": "Idioma",
+    "about": "Sobre",
+    "checkUpdate": "Verificar atualizações",
+    "version": "Versão",
+    "close": "Fechar configurações",
+    "saved": "Configurações salvas.",
+    "directoryHelp": "Os aplicativos serão instalados neste local.",
+    "languagePortuguese": "Português (Brasil)",
+    "languageEnglish": "Inglês",
+    "launcherDescription": "Um lugar para instalar, atualizar e abrir suas ferramentas criativas.",
+    "noUpdate": "Nenhuma atualização disponível.",
+    "colors": {
+      "slate": "Cinza neutro",
+      "white": "Branco",
+      "blue": "Azul",
+      "purple": "Roxo",
+      "pink": "Rosa",
+      "red": "Vermelho",
+      "orange": "Laranja",
+      "amber": "Âmbar",
+      "green": "Verde",
+      "teal": "Verde-azulado"
+    },
+    "themes": {
+      "sectionTitle": "Temas e Personalização",
+      "sectionSubtitle": "Use o tema padrão do Synapps, crie seu próprio tema ou instale temas da comunidade (.json).",
+      "defaultThemeName": "Padrão (Synapps)",
+      "defaultThemeDesc": "Tema original em vidro acrílico com alternância Claro/Escuro.",
+      "builtInBadge": "Nativo",
+      "active": "Ativo",
+      "createNew": "Criar tema",
+      "importJson": "Instalar tema (.json)",
+      "openFolder": "Pasta de temas",
+      "openFolderHint": "Abrir a pasta local onde os arquivos .json de temas ficam salvos",
+      "createTitle": "Novo Tema Personalizado",
+      "editTitle": "Editar Tema",
+      "themeName": "Nome do tema",
+      "themeNamePlaceholder": "Ex: Meu Tema Criativo",
+      "untitledTheme": "Tema Personalizado",
+      "author": "Autor (opcional)",
+      "authorPlaceholder": "Seu nome ou estúdio",
+      "baseMode": "Base de contraste",
+      "showCustomCss": "Avançado: Adicionar CSS personalizado",
+      "hideCustomCss": "Ocultar CSS personalizado",
+      "saveAndApply": "Salvar e aplicar",
+      "edit": "Editar",
+      "export": "Exportar",
+      "delete": "Excluir tema",
+      "byAuthor": "por {{author}}",
+      "customThemeLabel": "Tema personalizado",
+      "savedSuccess": "Tema \"{{name}}\" salvo e aplicado!",
+      "importedSuccess": "Tema \"{{name}}\" instalado com sucesso!",
+      "exportedSuccess": "Tema \"{{name}}\" exportado com sucesso!",
+      "fields": {
+        "bgColor": "Fundo da janela",
+        "surfaceColor": "Superfície / Cards",
+        "popoverColor": "Menus flutuantes",
+        "accentColor": "Cor de destaque",
+        "iconColor": "Ícones e controles",
+        "textColor": "Texto principal",
+        "borderColor": "Bordas"
+      }
+    }
+  },
+  "onboarding": {
+    "title": "Bem-vindo ao Synapps",
+    "subtitle": "Vamos preparar seu espaço para os aplicativos criativos.",
+    "selectDir": "Escolher diretório de instalação",
+    "diskSpace": "Espaço livre disponível",
+    "continue": "Continuar",
+    "choose": "Selecionar pasta",
+    "required": "Selecione um diretório para continuar.",
+    "checkingSpace": "Consultando espaço em disco...",
+    "spaceUnavailable": "Informação de espaço indisponível",
+    "ready": "Tudo pronto para começar!"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "error": "Ocorreu um erro",
+    "retry": "Tentar novamente",
+    "search": "Buscar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "loading": "Carregando...",
+    "unknown": "Desconhecido",
+    "none": "Nenhum",
+    "available": "Disponível",
+    "copied": "Copiado",
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "restore": "Restaurar",
+    "exit": "Sair",
+    "success": "Concluído",
+    "info": "Informação",
+    "select": "Selecionar",
+    "notAvailable": "Não disponível",
+    "diskSpaceUnknown": "Não foi possível consultar o espaço livre.",
+    "clearSearch": "Limpar busca",
+    "navigation": "Navegação",
+    "apply": "Aplicar",
+    "invalidColor": "Informe uma cor hexadecimal válida."
+  },
+  "status": {
+    "notInstalled": "Não instalado",
+    "installed": "Instalado",
+    "updateAvailable": "Atualização disponível",
+    "installing": "Instalando",
+    "downloading": "Baixando",
+    "fallback": "Tentando alternativa...",
+    "comingSoon": "Em breve"
+  },
+  "notifications": {
+    "installed": "Aplicativo instalado com sucesso.",
+    "uninstalled": "Aplicativo desinstalado.",
+    "updated": "Aplicativo atualizado.",
+    "installError": "Falha na instalação.",
+    "uninstallError": "Falha ao desinstalar.",
+    "launchError": "Falha ao abrir o aplicativo."
+  },
+  "categories": {
+    "home": "Início",
+    "all": "Todos",
+    "design": "Design",
+    "media": "Mídia",
+    "office": "Escritório",
+    "threeD": "3D",
+    "dev": "Dev"
+  },
+  "home": {
+    "installedApps": "Aplicativos instalados",
+    "startApp": "Iniciar",
+    "browseCatalog": "Ver catálogo completo →",
+    "noInstalledApps": "Nenhum aplicativo instalado ainda.",
+    "noInstalledAppsHint": "Instale ferramentas do catálogo para acessá-las rapidamente por aqui.",
+    "exploreApps": "Explorar aplicativos",
+    "recentFiles": "Arquivos recentes",
+    "addShortcut": "Adicionar atalho",
+    "clearRecents": "Limpar",
+    "noRecentFiles": "Nenhum arquivo recente compatível encontrado.",
+    "noRecentFilesHint": "Apenas os 5 arquivos mais recentes compatíveis com seus programas instalados aparecem aqui.",
+    "noRecentFilesNeedApps": "Instale ao menos um programa para exibir atalhos dos seus arquivos compatíveis recentes.",
+    "openFileLocation": "Abrir local do arquivo",
+    "removeShortcut": "Remover dos recentes",
+    "openWithApp": "Abrir com {{app}}",
+    "openError": "Não foi possível abrir este arquivo.",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "daysAgo": "há {{count}} dias"
+  },
+  "apps": {
+    "photocraft": {
+      "description": "Edição de imagens, camadas, máscaras e arquivos PSD."
+    },
+    "lightcraft": {
+      "description": "Organização de fotografias e revelação de arquivos RAW."
+    },
+    "filmcraft": {
+      "description": "Edição de vídeo não linear, cor e áudio."
+    },
+    "designcraft": {
+      "description": "Diagramação de páginas e publicação."
+    },
+    "vectorcraft": {
+      "description": "Ilustração vetorial e criação de formas."
+    },
+    "pdfcraft": {
+      "description": "Leitura, organização e proteção de PDFs."
+    },
+    "effectcraft": {
+      "description": "Motion graphics e efeitos visuais."
+    },
+    "wordcraft": {
+      "description": "Criação e edição de documentos de texto."
+    },
+    "deckcraft": {
+      "description": "Apresentações e narrativas visuais."
+    },
+    "gridcraft": {
+      "description": "Planilhas e organização de dados."
+    },
+    "cadcraft": {
+      "description": "Desenho técnico e projetos CAD."
+    },
+    "soundcraft": {
+      "description": "Criação, edição e produção de áudio."
+    },
+    "figcraft": {
+      "description": "Ferramentas para desenho e criação visual."
+    },
+    "graphite": {
+      "description": "Editor procedural 2D vetorial e raster em Rust baseado em nós."
+    },
+    "pixelorama": {
+      "description": "Estúdio completo para Pixel Art, spritesheets e animação 2D."
+    },
+    "blockbench": {
+      "description": "Modelagem 3D low-poly, mapeamento UV, texturas e animação."
+    },
+    "pencil2d": {
+      "description": "Animação 2D tradicional desenhada à mão (frame-a-frame)."
+    },
+    "upscayl": {
+      "description": "Upscaler de imagens com IA local para aumentar resolução sem perder nitidez."
+    },
+    "fontforge": {
+      "description": "Criação e edição profissional de fontes tipográficas (OTF, TTF, SVG)."
+    },
+    "imageglass": {
+      "description": "Visualizador rápido de imagens compatível com mais de 80 formatos (PSD, SVG, RAW, HEIC)."
+    },
+    "obs": {
+      "description": "Gravação de tela de alta performance, composição de cenas e transmissão ao vivo."
+    },
+    "shotcut": {
+      "description": "Editor de vídeo não-linear completo com suporte a centenas de formatos e 4K."
+    },
+    "losslesscut": {
+      "description": "Corte e recorte ultrarrápido de vídeo e áudio sem necessidade de recodificação."
+    },
+    "audacity": {
+      "description": "Editor e gravador de áudio multipista com efeitos e análise espectral."
+    },
+    "lmms": {
+      "description": "Estação de trabalho de áudio digital (DAW) para produção musical e sintetizadores."
+    },
+    "sharex": {
+      "description": "Captura de tela avançada, anotação visual e gravação de vídeo/GIF."
+    },
+    "appflowy": {
+      "description": "Workspace colaborativo open-source para notas, wikis, kanban e bancos de dados."
+    },
+    "affine": {
+      "description": "Base de conhecimento unindo documentos estruturados, kanban e quadro branco infinito."
+    },
+    "onlyoffice": {
+      "description": "Suíte completa de escritório para textos, planilhas, apresentações e PDFs."
+    },
+    "superproductivity": {
+      "description": "Gerenciador avançado de tarefas, time-tracker, Pomodoro e planejamento diário."
+    },
+    "freecad": {
+      "description": "Modelador 3D paramétrico CAD/CAM/BIM completo para engenharia e arquitetura."
+    },
+    "librecad": {
+      "description": "Aplicativo CAD 2D leve para plantas baixas e desenho técnico (DXF/DWG)."
+    },
+    "godot": {
+      "description": "Motor 2D e 3D multiplataforma para projetos interativos, simulações e jogos."
+    },
+    "orcaslicer": {
+      "description": "Fatiador G-code avançado para impressão 3D com calibração e suportes em árvore."
+    },
+    "prusaslicer": {
+      "description": "Ferramenta confiável de preparação e fatiamento de modelos para impressoras 3D."
+    },
+    "dust3d": {
+      "description": "Modelagem 3D rápida de malhas, auto-rigging e UV unwrap para assets visuais."
+    },
+    "gimp": {
+      "description": "Editor profissional de imagens raster para retoque fotográfico, composição e design gráfico."
+    },
+    "krita": {
+      "description": "Estúdio completo de pintura digital, arte conceitual, ilustração e animação 2D."
+    },
+    "blender": {
+      "description": "Suíte completa de criação 3D para modelagem, escultura, rigging, animação, simulação e renderização."
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "latte-paper",
+  "name": "Catppuccin Latte",
+  "author": "Synapps Community",
+  "version": "1.0.0",
+  "description": "Tema claro aconchegante em tons pastel de café e papel creme.",
+  "baseMode": "light",
+  "bgColor": "#eff1f5",
+  "surfaceColor": "#e6e9ef",
+  "popoverColor": "#dce0e8",
+  "accentColor": "#8839ef",
+  "iconColor": "#fe640b",
+  "textColor": "#4c4f69",
+  "textSecondaryColor": "#5c5f77",
+  "borderColor": "#bcc0cc",
+  "variables": {},
+  "customCss": null
+}

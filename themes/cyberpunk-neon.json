@@ -1,0 +1,18 @@
+{
+  "id": "cyberpunk-neon",
+  "name": "Cyberpunk Neon",
+  "author": "Synapps Community",
+  "version": "1.0.0",
+  "description": "Contraste futurista de alto impacto com ciano elétrico e magenta neon.",
+  "baseMode": "dark",
+  "bgColor": "#090414",
+  "surfaceColor": "#140a29",
+  "popoverColor": "#0e061e",
+  "accentColor": "#00f0ff",
+  "iconColor": "#ff2a85",
+  "textColor": "#fdf8ff",
+  "textSecondaryColor": "#d8b4fe",
+  "borderColor": "#3b1d6e",
+  "variables": {},
+  "customCss": null
+}

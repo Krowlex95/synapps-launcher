@@ -1,0 +1,18 @@
+{
+  "id": "nord-frost",
+  "name": "Nord Frost",
+  "author": "Synapps Community",
+  "version": "1.0.0",
+  "description": "Paleta ártica minimalista com tons azul-gelo suaves para longas sessões criativas.",
+  "baseMode": "dark",
+  "bgColor": "#242933",
+  "surfaceColor": "#2e3440",
+  "popoverColor": "#292e39",
+  "accentColor": "#88c0d0",
+  "iconColor": "#81a1c1",
+  "textColor": "#eceff4",
+  "textSecondaryColor": "#d8dee9",
+  "borderColor": "#434c5e",
+  "variables": {},
+  "customCss": null
+}

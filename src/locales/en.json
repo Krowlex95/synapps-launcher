@@ -1,0 +1,342 @@
+{
+  "sidebar": {
+    "home": "Home",
+    "all": "All",
+    "news": "News",
+    "design": "Design",
+    "media": "Media",
+    "office": "Office",
+    "threeD": "3D",
+    "dev": "Dev",
+    "settings": "Settings",
+    "subtitle": "Creative suite",
+    "categoriesSection": "Categories",
+    "developersSection": "Developers",
+    "developerSubtitle": "Applications developed by {{developer}}.",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  },
+  "news": {
+    "title": "App News & Updates",
+    "subtitle": "Keep up with recent versions, changelogs, and release notes across the catalog.",
+    "allApps": "All apps",
+    "installedOnly": "Installed only",
+    "whatsNew": "What's new in this version",
+    "loadingNotes": "Loading release notes...",
+    "showMore": "Read full release notes",
+    "showLess": "Show less",
+    "releasedOn": "Released on {{date}}",
+    "latestRelease": "Latest release",
+    "noInstalledNews": "No installed apps yet to filter release notes.",
+    "defaultHighlights": "Stability improvements, Windows x64 performance optimizations, and UI refinements."
+  },
+  "app": {
+    "install": "Install",
+    "open": "Open",
+    "update": "Update",
+    "uninstall": "Uninstall",
+    "installing": "Installing",
+    "downloading": "Downloading",
+    "fallback": "Trying fallback...",
+    "comingSoon": "Coming soon",
+    "installed": "Installed",
+    "updateAvailable": "Update available",
+    "notInstalled": "Not installed",
+    "version": "Version",
+    "searchPlaceholder": "Search apps...",
+    "empty": "No apps found.",
+    "loading": "Syncing apps...",
+    "openFolder": "Open install location",
+    "installFailed": "Could not install the app.",
+    "uninstallFailed": "Could not uninstall the app.",
+    "launchFailed": "Could not launch the app.",
+    "releaseNotes": "Release notes",
+    "noDescription": "A creative tool from the Craft App Suite.",
+    "updateLauncher": "Update launcher",
+    "appCount": "{{count}} apps",
+    "filter": "Filter",
+    "clearFilters": "Clear filters",
+    "filterByCategory": "Categories",
+    "filterByDeveloper": "Developers"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "accentColor": "Accent color",
+    "sidebarIconColor": "Sidebar icon color",
+    "installDir": "Install directory",
+    "changeDir": "Change",
+    "language": "Language",
+    "about": "About",
+    "checkUpdate": "Check for updates",
+    "version": "Version",
+    "close": "Close settings",
+    "saved": "Settings saved.",
+    "directoryHelp": "Apps will be installed in this location.",
+    "languagePortuguese": "Portuguese (Brazil)",
+    "languageEnglish": "English",
+    "launcherDescription": "One place to install, update, and open your creative tools.",
+    "noUpdate": "No update available.",
+    "colors": {
+      "slate": "Neutral slate",
+      "white": "White",
+      "blue": "Blue",
+      "purple": "Purple",
+      "pink": "Pink",
+      "red": "Red",
+      "orange": "Orange",
+      "amber": "Amber",
+      "green": "Green",
+      "teal": "Teal"
+    },
+    "themes": {
+      "sectionTitle": "Themes & Customization",
+      "sectionSubtitle": "Use the built-in Synapps theme, customize your own, or install community themes (.json).",
+      "defaultThemeName": "Default (Synapps)",
+      "defaultThemeDesc": "Original acrylic frosted glass theme with Light/Dark toggle.",
+      "builtInBadge": "Built-in",
+      "active": "Active",
+      "createNew": "Create theme",
+      "importJson": "Install theme (.json)",
+      "openFolder": "Themes folder",
+      "openFolderHint": "Open the local folder where .json theme files are stored",
+      "createTitle": "New Custom Theme",
+      "editTitle": "Edit Theme",
+      "themeName": "Theme name",
+      "themeNamePlaceholder": "e.g. My Studio Theme",
+      "untitledTheme": "Custom Theme",
+      "author": "Author (optional)",
+      "authorPlaceholder": "Your name or studio",
+      "baseMode": "Contrast base",
+      "showCustomCss": "Advanced: Add custom CSS",
+      "hideCustomCss": "Hide custom CSS",
+      "saveAndApply": "Save & apply",
+      "edit": "Edit",
+      "export": "Export",
+      "delete": "Delete theme",
+      "byAuthor": "by {{author}}",
+      "customThemeLabel": "Custom theme",
+      "savedSuccess": "Theme \"{{name}}\" saved and applied!",
+      "importedSuccess": "Theme \"{{name}}\" installed successfully!",
+      "exportedSuccess": "Theme \"{{name}}\" exported successfully!",
+      "fields": {
+        "bgColor": "Window background",
+        "surfaceColor": "Surface / Cards",
+        "popoverColor": "Floating menus",
+        "accentColor": "Accent color",
+        "iconColor": "Icons & controls",
+        "textColor": "Primary text",
+        "borderColor": "Borders"
+      }
+    }
+  },
+  "onboarding": {
+    "title": "Welcome to Synapps",
+    "subtitle": "Let's prepare your space for creative apps.",
+    "selectDir": "Choose an install directory",
+    "diskSpace": "Available disk space",
+    "continue": "Continue",
+    "choose": "Choose folder",
+    "required": "Select a directory to continue.",
+    "checkingSpace": "Checking disk space...",
+    "spaceUnavailable": "Disk space information unavailable",
+    "ready": "You're ready to create!"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "search": "Search",
+    "close": "Close",
+    "back": "Back",
+    "loading": "Loading...",
+    "unknown": "Unknown",
+    "none": "None",
+    "available": "Available",
+    "copied": "Copied",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "restore": "Restore",
+    "exit": "Exit",
+    "success": "Done",
+    "info": "Information",
+    "select": "Select",
+    "notAvailable": "Unavailable",
+    "diskSpaceUnknown": "Unable to check free disk space.",
+    "clearSearch": "Clear search",
+    "navigation": "Navigation",
+    "apply": "Apply",
+    "invalidColor": "Enter a valid hexadecimal color."
+  },
+  "status": {
+    "notInstalled": "Not installed",
+    "installed": "Installed",
+    "updateAvailable": "Update available",
+    "installing": "Installing",
+    "downloading": "Downloading",
+    "fallback": "Trying fallback...",
+    "comingSoon": "Coming soon"
+  },
+  "notifications": {
+    "installed": "App installed successfully.",
+    "uninstalled": "App uninstalled.",
+    "updated": "App updated.",
+    "installError": "Installation failed.",
+    "uninstallError": "Uninstallation failed.",
+    "launchError": "Could not launch the app."
+  },
+  "categories": {
+    "home": "Home",
+    "all": "All",
+    "design": "Design",
+    "media": "Media",
+    "office": "Office",
+    "threeD": "3D",
+    "dev": "Dev"
+  },
+  "home": {
+    "installedApps": "Installed apps",
+    "startApp": "Start",
+    "browseCatalog": "Browse full catalog →",
+    "noInstalledApps": "No apps installed yet.",
+    "noInstalledAppsHint": "Install tools from the catalog to launch them quickly from here.",
+    "exploreApps": "Explore apps",
+    "recentFiles": "Recent files",
+    "addShortcut": "Add shortcut",
+    "clearRecents": "Clear",
+    "noRecentFiles": "No compatible recent files found.",
+    "noRecentFilesHint": "Only the 5 most recent files compatible with your installed programs appear here.",
+    "noRecentFilesNeedApps": "Install at least one program to display shortcuts for your recent compatible files.",
+    "openFileLocation": "Open file location",
+    "removeShortcut": "Remove from recents",
+    "openWithApp": "Open with {{app}}",
+    "openError": "Could not open this file.",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{{count}} days ago"
+  },
+  "apps": {
+    "photocraft": {
+      "description": "Image editing, layers, masks, and PSD files."
+    },
+    "lightcraft": {
+      "description": "Photo library management and RAW development."
+    },
+    "filmcraft": {
+      "description": "Nonlinear video editing, color, and audio."
+    },
+    "designcraft": {
+      "description": "Page layout and publishing."
+    },
+    "vectorcraft": {
+      "description": "Vector illustration and shape creation."
+    },
+    "pdfcraft": {
+      "description": "Read, organize, and protect PDF files."
+    },
+    "effectcraft": {
+      "description": "Motion graphics and visual effects."
+    },
+    "wordcraft": {
+      "description": "Create and edit text documents."
+    },
+    "deckcraft": {
+      "description": "Presentations and visual storytelling."
+    },
+    "gridcraft": {
+      "description": "Spreadsheets and data organization."
+    },
+    "cadcraft": {
+      "description": "Technical drawing and CAD projects."
+    },
+    "soundcraft": {
+      "description": "Audio creation, editing, and production."
+    },
+    "figcraft": {
+      "description": "Tools for drawing and visual creation."
+    },
+    "graphite": {
+      "description": "Procedural 2D vector and raster graphics editor powered by a node graph."
+    },
+    "pixelorama": {
+      "description": "Complete 2D sprite, pixel art, tilemap, and frame-by-frame animation studio."
+    },
+    "blockbench": {
+      "description": "Low-poly 3D model editor with UV mapping, textures, and animation."
+    },
+    "pencil2d": {
+      "description": "Intuitive hand-drawn 2D traditional frame-by-frame animation software."
+    },
+    "upscayl": {
+      "description": "Local AI image upscaler that enhances resolution without losing sharpness."
+    },
+    "fontforge": {
+      "description": "Professional font editor supporting OpenType, TrueType, PostScript, and SVG."
+    },
+    "imageglass": {
+      "description": "Fast image viewer supporting 80+ formats including PSD, SVG, RAW, and HEIC."
+    },
+    "obs": {
+      "description": "High-performance screen recording, scene composition, and live streaming."
+    },
+    "shotcut": {
+      "description": "Cross-platform nonlinear video editor supporting hundreds of formats and 4K."
+    },
+    "losslesscut": {
+      "description": "Ultrafast, lossless trimming and cutting of video and audio without re-encoding."
+    },
+    "audacity": {
+      "description": "Multi-track audio editor and recorder with real-time effects and spectrograms."
+    },
+    "lmms": {
+      "description": "Digital audio workstation (DAW) for music production, beats, and synthesizers."
+    },
+    "sharex": {
+      "description": "Advanced screen capture, visual annotation, and GIF/video workflow tool."
+    },
+    "appflowy": {
+      "description": "Open-source workspace for notes, wikis, kanban boards, and databases."
+    },
+    "affine": {
+      "description": "Knowledge base uniting structured documents, kanban, and infinite whiteboards."
+    },
+    "onlyoffice": {
+      "description": "Full-featured office suite for documents, spreadsheets, presentations, and PDFs."
+    },
+    "superproductivity": {
+      "description": "Advanced to-do list, time tracker, Pomodoro timer, and daily planner."
+    },
+    "freecad": {
+      "description": "Parametric 3D CAD/CAM/BIM modeler for engineering and architecture."
+    },
+    "librecad": {
+      "description": "Lightweight 2D CAD application for floor plans and technical drawings (DXF/DWG)."
+    },
+    "godot": {
+      "description": "Cross-platform 2D and 3D engine for interactive projects, simulations, and games."
+    },
+    "orcaslicer": {
+      "description": "Advanced 3D printing G-code slicer with calibration and tree supports."
+    },
+    "prusaslicer": {
+      "description": "Reliable 3D model slicing and preparation tool for 3D printers."
+    },
+    "dust3d": {
+      "description": "Fast 3D watertight mesh modeling, auto-rigging, and UV unwrapping tool."
+    },
+    "gimp": {
+      "description": "Professional raster image editor for photo retouching, composition, and graphic design."
+    },
+    "krita": {
+      "description": "Complete digital painting, concept art, illustration, and 2D animation studio."
+    },
+    "blender": {
+      "description": "Complete 3D creation suite for modeling, sculpting, rigging, animation, simulation, and rendering."
+    }
+  }
+}

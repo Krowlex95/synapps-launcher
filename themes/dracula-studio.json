@@ -1,0 +1,18 @@
+{
+  "id": "dracula-studio",
+  "name": "Dracula Studio",
+  "author": "Synapps Community",
+  "version": "1.0.0",
+  "description": "Tema escuro inspirado na paleta clássica Dracula com tons vampíricos e roxo vibrante.",
+  "baseMode": "dark",
+  "bgColor": "#191a24",
+  "surfaceColor": "#282a36",
+  "popoverColor": "#21222c",
+  "accentColor": "#bd93f9",
+  "iconColor": "#ff79c6",
+  "textColor": "#f8f8f2",
+  "textSecondaryColor": "#cbd5e1",
+  "borderColor": "#44475a",
+  "variables": {},
+  "customCss": null
+}

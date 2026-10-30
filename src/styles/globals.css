@@ -1,0 +1,334 @@
+@import "tailwindcss";
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-primary: #8b5cf6;
+  --sidebar-icon-color: #f8fafc;
+  --color-bg: #0b101b;
+  --color-surface: #0f1626;
+  --color-surface-hover: #192338;
+  --color-text: #f1f5f9;
+  --color-text-secondary: rgba(241, 245, 249, 0.70);
+  --color-text-muted: rgba(241, 245, 249, 0.48);
+  --color-border: rgba(255, 255, 255, 0.12);
+  --divider-line: rgba(255, 255, 255, 0.11);
+  --pill-bg: rgba(255, 255, 255, 0.08);
+  --pill-bg-hover: rgba(255, 255, 255, 0.15);
+  --pill-ring: rgba(255, 255, 255, 0.14);
+  --item-hover-bg: rgba(255, 255, 255, 0.06);
+  --nav-active-bg: rgba(255, 255, 255, 0.15);
+  --nav-active-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 4px 14px rgba(0, 0, 0, 0.18);
+  --dropdown-tray-bg: rgba(5, 9, 18, 0.94);
+  --dropdown-tray-rim: rgba(255, 255, 255, 0.15);
+  --skeleton-bg: rgba(255, 255, 255, 0.08);
+  --skeleton-subtle-bg: rgba(255, 255, 255, 0.05);
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --glass-opacity: 86%;
+  --glass-blur: 24px;
+  --sidebar-width: 68px;
+  --glow-color: rgba(139, 92, 246, 0.3);
+  --app-shell-bg:
+    radial-gradient(circle at 14% 16%, rgba(56, 189, 248, 0.10) 0%, transparent 45%),
+    radial-gradient(circle at 86% 84%, rgba(139, 92, 246, 0.14) 0%, transparent 48%),
+    rgba(12, 17, 29, 0.60);
+  --card-bg: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.115) 0%,
+    rgba(255, 255, 255, 0.045) 100%
+  );
+  --card-hover-bg: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.155) 0%,
+    rgba(255, 255, 255, 0.07) 100%
+  );
+  --card-open-bg: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.165) 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  --card-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.11);
+  --card-hover-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  --card-open-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.20);
+  --panel-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.095) 0%,
+    rgba(255, 255, 255, 0.035) 100%
+  );
+  --panel-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  --popover-bg: rgba(13, 19, 33, 0.95);
+  --popover-shadow:
+    0 20px 44px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #eef2f9;
+  --color-surface: #f7f9fd;
+  --color-surface-hover: #e9eef7;
+  --color-text: #0f172a;
+  --color-text-secondary: rgba(15, 23, 42, 0.70);
+  --color-text-muted: rgba(15, 23, 42, 0.50);
+  --color-border: rgba(15, 23, 42, 0.11);
+  --divider-line: rgba(15, 23, 42, 0.10);
+  --pill-bg: rgba(15, 23, 42, 0.06);
+  --pill-bg-hover: rgba(15, 23, 42, 0.11);
+  --pill-ring: rgba(15, 23, 42, 0.11);
+  --item-hover-bg: rgba(15, 23, 42, 0.05);
+  --nav-active-bg: rgba(255, 255, 255, 0.85);
+  --nav-active-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 4px 12px rgba(15, 23, 42, 0.08);
+  --dropdown-tray-bg: rgba(203, 213, 228, 0.96);
+  --dropdown-tray-rim: rgba(15, 23, 42, 0.14);
+  --skeleton-bg: rgba(15, 23, 42, 0.08);
+  --skeleton-subtle-bg: rgba(15, 23, 42, 0.05);
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --glass-opacity: 90%;
+  --app-shell-bg:
+    radial-gradient(circle at 14% 16%, rgba(56, 189, 248, 0.15) 0%, transparent 46%),
+    radial-gradient(circle at 86% 84%, rgba(139, 92, 246, 0.14) 0%, transparent 48%),
+    rgba(235, 241, 250, 0.72);
+  --card-bg: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.76) 0%,
+    rgba(255, 255, 255, 0.52) 100%
+  );
+  --card-hover-bg: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(255, 255, 255, 0.66) 100%
+  );
+  --card-open-bg: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.74) 100%
+  );
+  --card-shadow:
+    0 10px 22px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+  --card-hover-shadow:
+    0 14px 28px rgba(15, 23, 42, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.12);
+  --card-open-shadow:
+    0 10px 22px rgba(15, 23, 42, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.14);
+  --panel-bg: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.48) 100%
+  );
+  --panel-shadow:
+    0 12px 26px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.09);
+  --popover-bg: rgba(248, 250, 255, 0.96);
+  --popover-shadow:
+    0 20px 44px rgba(15, 23, 42, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+}
+
+body {
+  overflow: hidden;
+  color: var(--color-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+}
+
+/* Seamless Borderless Acrylic Window Canvas */
+.app-shell {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--app-shell-bg);
+  transition: background 0.25s ease;
+}
+
+/* Shared Frosted Glass Card Aesthetic (Zero Child backdrop-filter -> Zero Partial-Repaint Artifacts) */
+.home-app-tile,
+.app-card {
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  transition:
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.24s ease;
+}
+
+.home-app-tile:hover,
+.app-card:hover {
+  background: var(--card-hover-bg);
+  transform: translateY(-2px);
+  box-shadow: var(--card-hover-shadow);
+}
+
+.home-app-tile[data-open="true"] {
+  background: var(--card-open-bg);
+  transform: translateY(0);
+  box-shadow: var(--card-open-shadow);
+}
+
+/* Unified Frosted Panel Aesthetic (Recent Files + Sidebar + Search Pill) */
+.home-recents-panel,
+.frosted-panel {
+  background: var(--panel-bg);
+  box-shadow: var(--panel-shadow);
+}
+
+/* High-Opacity Floating Popovers & Settings Drawer */
+.floating-popover,
+.glass {
+  background: var(--popover-bg);
+  backdrop-filter: blur(28px) saturate(165%);
+  -webkit-backdrop-filter: blur(28px) saturate(165%);
+  box-shadow: var(--popover-shadow);
+}
+
+/* Semantic Theme Helpers */
+.theme-text {
+  color: var(--color-text);
+}
+
+.theme-text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.theme-text-muted {
+  color: var(--color-text-muted);
+}
+
+.theme-divider {
+  border-color: var(--divider-line);
+}
+
+.theme-pill {
+  background: var(--pill-bg);
+  box-shadow: inset 0 0 0 1px var(--pill-ring);
+  color: var(--color-text-secondary);
+}
+
+.theme-pill-interactive {
+  background: var(--pill-bg);
+  box-shadow: inset 0 0 0 1px var(--pill-ring);
+  color: var(--color-text);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.theme-pill-interactive:hover {
+  background: var(--pill-bg-hover);
+}
+
+.theme-nav-active {
+  background: var(--nav-active-bg);
+  box-shadow: var(--nav-active-shadow), inset 0 0 0 1px var(--pill-ring);
+  color: var(--color-text);
+}
+
+.surface-border {
+  border-color: var(--color-border);
+}
+
+.muted-text {
+  color: var(--color-text-muted);
+}
+
+.primary-focus:focus-visible {
+  outline-color: var(--color-primary);
+}
+
+/* Minimalist Customizable Sidebar Icons */
+.sidebar-icon {
+  color: var(--sidebar-icon-color);
+  opacity: 0.86;
+  transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease, color 0.2s ease;
+}
+
+.group:hover .sidebar-icon,
+.sidebar-icon-active {
+  color: var(--sidebar-icon-color);
+  opacity: 1;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--sidebar-icon-color) 38%, transparent));
+}
+
+/* Minimalist Window Controls Synchronized with Icon Color */
+.window-control-dot {
+  background-color: var(--sidebar-icon-color);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease, background-color 0.25s ease;
+}
+
+.group\/btn:hover .window-control-dot {
+  transform: scale(1.15);
+  box-shadow: 0 0 11px color-mix(in srgb, var(--sidebar-icon-color) 58%, transparent), inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+.group\/btn:active .window-control-dot {
+  transform: scale(0.95);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.28) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.28);
+  border-radius: 9999px;
+}
+
+.drag-region {
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}

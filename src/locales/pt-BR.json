@@ -56,7 +56,24 @@
     "filter": "Filtrar",
     "clearFilters": "Limpar filtros",
     "filterByCategory": "Categorias",
-    "filterByDeveloper": "Desenvolvedoras"
+    "filterByDeveloper": "Desenvolvedoras",
+    "viewDetails": "Detalhes e opções",
+    "cancelDownload": "Cancelar download",
+    "updateAll": "Atualizar todos",
+    "scanSystemApps": "Detectar no PC",
+    "diskSize": "Espaço em disco",
+    "lastUsed": "Último uso",
+    "compatibleFormats": "Formatos compatíveis",
+    "createDesktopShortcut": "Criar atalho na Área de Trabalho",
+    "shortcutCreated": "Atalho criado!",
+    "locateExisting": "Vincular já instalado"
+  },
+  "commandPalette": {
+    "placeholder": "Buscar aplicativos, abrir programas ou executar comandos (Ctrl+K)...",
+    "scanSubtitle": "Escanear o Windows em busca de programas do catálogo já instalados",
+    "actionBadge": "Ação",
+    "navSubtitle": "Navegar no launcher",
+    "navBadge": "Ir para"
   },
   "settings": {
     "title": "Configurações",
@@ -72,7 +89,11 @@
     "githubToken": "Token do GitHub",
     "language": "Idioma",
     "about": "Sobre",
-    "checkUpdate": "Verificar atualizações",
+    "checkUpdate": "Buscar atualizações",
+    "checkingUpdate": "Buscando atualizações...",
+    "upToDate": "Você já está na versão mais recente (v{{version}}).",
+    "installUpdateNow": "Atualizar agora para {{version}} e reiniciar",
+    "downloadingUpdate": "Baixando e instalando atualização...",
     "version": "Versão",
     "close": "Fechar configurações",
     "saved": "Configurações salvas.",
@@ -123,6 +144,8 @@
       "savedSuccess": "Tema \"{{name}}\" salvo e aplicado!",
       "importedSuccess": "Tema \"{{name}}\" instalado com sucesso!",
       "exportedSuccess": "Tema \"{{name}}\" exportado com sucesso!",
+      "onlineGallery": "Galeria Online",
+      "onlineGalleryTitle": "Temas Oficiais da Comunidade (GitHub)",
       "fields": {
         "bgColor": "Fundo da janela",
         "surfaceColor": "Superfície / Cards",
@@ -171,7 +194,10 @@
     "clearSearch": "Limpar busca",
     "navigation": "Navegação",
     "apply": "Aplicar",
-    "invalidColor": "Informe uma cor hexadecimal válida."
+    "invalidColor": "Informe uma cor hexadecimal válida.",
+    "updateAvailable": "Nova versão do Synapps disponível ({{version}})",
+    "updateNotes": "Clique para baixar e atualizar o launcher automaticamente.",
+    "updateNow": "Atualizar agora"
   },
   "status": {
     "notInstalled": "Não instalado",
@@ -188,7 +214,11 @@
     "updated": "Aplicativo atualizado.",
     "installError": "Falha na instalação.",
     "uninstallError": "Falha ao desinstalar.",
-    "launchError": "Falha ao abrir o aplicativo."
+    "launchError": "Falha ao abrir o aplicativo.",
+    "downloadCancelled": "Download cancelado.",
+    "linkedExisting": "Aplicativo vinculado com sucesso!",
+    "scannedSystemFound": "{{count}} aplicativo(s) já instalado(s) detectado(s) no seu PC!",
+    "scannedSystemNone": "Nenhum novo aplicativo instalado foi encontrado nos locais padrão."
   },
   "categories": {
     "home": "Início",
@@ -218,7 +248,9 @@
     "openError": "Não foi possível abrir este arquivo.",
     "today": "Hoje",
     "yesterday": "Ontem",
-    "daysAgo": "há {{count}} dias"
+    "daysAgo": "há {{count}} dias",
+    "pinApp": "Fixar no topo",
+    "unpinApp": "Desafixar"
   },
   "apps": {
     "photocraft": {

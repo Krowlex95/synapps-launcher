@@ -111,6 +111,57 @@ export const uninstallApp = async (appId: string): Promise<void> => {
   await new Promise((r) => setTimeout(r, 300));
 };
 
+export const cancelInstall = async (appId: string): Promise<void> => {
+  if (isTauri) {
+    return invoke<void>('cancel_install', { appId });
+  }
+};
+
+export const openAppFolder = async (appId: string): Promise<void> => {
+  if (isTauri) {
+    return invoke<void>('open_app_folder', { appId });
+  }
+};
+
+export const createDesktopShortcut = async (appId: string): Promise<void> => {
+  if (isTauri) {
+    return invoke<void>('create_desktop_shortcut', { appId });
+  }
+};
+
+export const getAppDiskUsage = async (appId: string): Promise<number> => {
+  if (isTauri) {
+    return invoke<number>('get_app_disk_usage', { appId });
+  }
+  return 185 * 1024 * 1024;
+};
+
+export const linkExistingApp = async (appId: string): Promise<InstallCompleteEvent | null> => {
+  if (isTauri) {
+    const raw = await invoke<any>('link_existing_app', { appId });
+    if (!raw) return null;
+    return {
+      appId: raw.appId ?? raw.app_id ?? appId,
+      installedVersion: raw.installedVersion ?? raw.installed_version ?? raw.version,
+      latestVersion: raw.latestVersion ?? raw.latest_version ?? raw.version,
+    };
+  }
+  return null;
+};
+
+export const scanSystemApps = async (): Promise<InstallCompleteEvent[]> => {
+  if (isTauri) {
+    const raw = await invoke<any[]>('scan_system_apps');
+    if (!Array.isArray(raw)) return [];
+    return raw.map((item) => ({
+      appId: item.appId ?? item.app_id ?? '',
+      installedVersion: item.installedVersion ?? item.installed_version ?? item.version,
+      latestVersion: item.latestVersion ?? item.latest_version ?? item.version,
+    }));
+  }
+  return [];
+};
+
 export const launchApp = async (appId: string): Promise<void> => {
   if (isTauri) {
     return invoke<void>('launch_app', { appId });
@@ -231,6 +282,14 @@ export const openThemesFolder = async (): Promise<void> => {
   }
 };
 
+export const fetchCommunityThemes = async (): Promise<CustomTheme[]> => {
+  if (isTauri) {
+    const raw = await invoke<any[]>('fetch_community_themes');
+    return Array.isArray(raw) ? raw.map(normalizeCustomTheme) : [];
+  }
+  return [];
+};
+
 export const selectInstallDirectory = async (): Promise<string | null> => {
   if (isTauri) {
     return invoke<string | null>('select_install_directory');
@@ -251,12 +310,56 @@ export const isFirstRun = async (): Promise<boolean> => {
   return localStorage.getItem('artcraft_first_run_done') !== 'true';
 };
 
-export const checkLauncherUpdate = async (): Promise<Release | null> => {
+export interface LauncherUpdateInfo {
+  current_version: string;
+  latest_version: string;
+  update_available: boolean;
+  release_notes?: string;
+  download_url?: string;
+  published_at?: string;
+}
+
+export interface LauncherUpdateProgress {
+  downloaded: number;
+  total: number;
+  progress: number;
+  speedBps: number;
+}
+
+export const checkLauncherUpdate = async (): Promise<LauncherUpdateInfo | null> => {
   if (isTauri) {
-    return invoke<Release | null>('check_launcher_update');
+    return invoke<LauncherUpdateInfo>('check_launcher_update');
   }
-  return null;
+  return {
+    current_version: '0.2.0',
+    latest_version: '0.2.0',
+    update_available: false,
+  };
 };
+
+export const installLauncherUpdate = async (downloadUrl?: string): Promise<void> => {
+  if (isTauri) {
+    return invoke<void>('install_launcher_update', { downloadUrl: downloadUrl ?? null });
+  }
+};
+
+export function listenLauncherUpdateProgress(
+  handler: (payload: LauncherUpdateProgress) => void,
+): Promise<UnlistenFn> {
+  if (!isTauri) {
+    return Promise.resolve(() => {});
+  }
+  return listen<any>('launcher-update-progress', (event) => {
+    const raw = event.payload;
+    if (!raw) return;
+    handler({
+      downloaded: raw.downloaded ?? 0,
+      total: raw.total ?? 0,
+      progress: raw.progress ?? 0,
+      speedBps: raw.speed_bps ?? raw.speedBps ?? 0,
+    });
+  });
+}
 
 export const getAvailableDiskSpace = async (path: string): Promise<number | null> => {
   if (isTauri) {
@@ -359,6 +462,7 @@ export function listenDownloadProgress(
       progress: progress ?? 0,
       downloadedBytes: raw.downloaded ?? raw.downloadedBytes,
       totalBytes: raw.total ?? raw.totalBytes,
+      speedBps: raw.speedBps ?? raw.speed_bps ?? 0,
       phase: raw.phase,
     });
   });

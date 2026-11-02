@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { openThemesFolder } from '../../lib/tauri';
+import { fetchCommunityThemes, openThemesFolder } from '../../lib/tauri';
 import { notify } from '../../lib/notifications';
 import type { CustomTheme } from '../../lib/types';
 import { useSettingsStore } from '../../stores/settingsStore';
@@ -39,6 +39,36 @@ export default function ThemeManager() {
 
   const [editingTheme, setEditingTheme] = useState<CustomTheme | null>(null);
   const [showAdvancedCss, setShowAdvancedCss] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryThemes, setGalleryThemes] = useState<CustomTheme[]>([]);
+  const [loadingGallery, setLoadingGallery] = useState(false);
+
+  const handleToggleGallery = async () => {
+    if (galleryOpen) {
+      setGalleryOpen(false);
+      return;
+    }
+    setGalleryOpen(true);
+    setLoadingGallery(true);
+    try {
+      const online = await fetchCommunityThemes();
+      setGalleryThemes(online);
+    } catch (error) {
+      notify({ variant: 'error', message: String(error) });
+    } finally {
+      setLoadingGallery(false);
+    }
+  };
+
+  const handleInstallFromGallery = async (theme: CustomTheme) => {
+    const saved = await upsertCustomTheme(theme, true);
+    if (saved) {
+      notify({
+        variant: 'success',
+        message: t('settings.themes.importedSuccess', { name: saved.name }),
+      });
+    }
+  };
 
   const startNewTheme = () => {
     const activeCustom = customThemes.find((item) => item.id === activeThemeId);
@@ -143,7 +173,7 @@ export default function ThemeManager() {
 
   return (
     <div className="space-y-3.5">
-      {/* Action Bar: Create, Import (.json), Open Folder */}
+      {/* Action Bar: Create, Import (.json), Online Gallery, Open Folder */}
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -151,6 +181,15 @@ export default function ThemeManager() {
           className="theme-pill-interactive cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold"
         >
           + {t('settings.themes.createNew')}
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleToggleGallery()}
+          className={`cursor-pointer rounded-xl px-3 py-2 text-xs font-medium transition ${
+            galleryOpen ? 'theme-nav-active font-semibold' : 'theme-pill-interactive'
+          }`}
+        >
+          {t('settings.themes.onlineGallery')}
         </button>
         <button
           type="button"
@@ -168,6 +207,69 @@ export default function ThemeManager() {
           {t('settings.themes.openFolder')}
         </button>
       </div>
+
+      {/* Online Community Theme Gallery Drawer */}
+      {galleryOpen && (
+        <div
+          className="rounded-2xl border p-3.5 space-y-2.5 surface-border"
+          style={{ background: 'color-mix(in srgb, var(--color-surface) 88%, transparent)' }}
+        >
+          <div className="flex items-center justify-between border-b pb-2 surface-border">
+            <span className="text-xs font-bold">{t('settings.themes.onlineGalleryTitle')}</span>
+            <button
+              type="button"
+              onClick={() => setGalleryOpen(false)}
+              className="text-xs muted-text hover:text-[var(--color-text)] cursor-pointer"
+            >
+              {t('common.close')}
+            </button>
+          </div>
+
+          {loadingGallery ? (
+            <p className="py-3 text-center text-xs muted-text">{t('common.loading')}</p>
+          ) : (
+            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+              {galleryThemes.map((gt) => {
+                const alreadyInstalled = customThemes.some((c) => c.id === gt.id);
+                return (
+                  <div
+                    key={gt.id}
+                    className="flex items-center justify-between gap-2 rounded-xl border p-2.5 surface-border"
+                    style={{ background: 'var(--color-bg)' }}
+                  >
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <div
+                        className="grid h-7 w-7 shrink-0 grid-cols-2 overflow-hidden rounded-lg border border-white/15"
+                        style={{ background: gt.bgColor || '#0b101b' }}
+                      >
+                        <span style={{ background: gt.bgColor || '#0b101b' }} />
+                        <span style={{ background: gt.surfaceColor || '#1e293b' }} />
+                        <span style={{ background: gt.accentColor || '#8b5cf6' }} />
+                        <span style={{ background: gt.iconColor || '#f8fafc' }} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="truncate text-xs font-bold">{gt.name}</div>
+                        <div className="truncate text-[10.5px] muted-text">
+                          {gt.description || gt.author}
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => void handleInstallFromGallery(gt)}
+                      className="shrink-0 cursor-pointer rounded-lg px-2.5 py-1 text-[10.5px] font-semibold text-white transition hover:brightness-110"
+                      style={{ background: 'var(--color-primary)' }}
+                    >
+                      {alreadyInstalled ? t('common.apply') : t('app.install')}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Visual Theme Creator / Editor Drawer */}
       {editingTheme && (

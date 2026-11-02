@@ -91,8 +91,14 @@ export default function HomeAppCard({
   const { t } = useTranslation();
   const launchApp = useAppStore((store) => store.launchApp);
   const installApp = useAppStore((store) => store.installApp);
+  const cancelAppInstall = useAppStore((store) => store.cancelAppInstall);
   const uninstallApp = useAppStore((store) => store.uninstallApp);
+  const openAppDetails = useAppStore((store) => store.openAppDetails);
+  const pinnedAppIds = useAppStore((store) => store.pinnedAppIds);
+  const togglePinApp = useAppStore((store) => store.togglePinApp);
   const [failed, setFailed] = useState(false);
+
+  const isPinned = pinnedAppIds.includes(state.app.id);
 
   const imgSrc = state.app.iconUrl || `/icons/apps/${state.app.id}.png`;
   const iconColor = APP_ICON_COLORS[state.app.id] ?? 'var(--color-primary)';
@@ -114,8 +120,9 @@ export default function HomeAppCard({
       className={`relative w-[138px] select-none ${menuOpen ? 'z-30' : 'z-10'}`}
     >
       {/* Upper Square Frosted Glass App Tile */}
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         data-open={menuOpen ? 'true' : 'false'}
         aria-expanded={!activeProgress ? menuOpen : undefined}
         onClick={() => {
@@ -123,8 +130,32 @@ export default function HomeAppCard({
             onToggleMenu();
           }
         }}
+        onKeyDown={(e) => {
+          if (!activeProgress && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            onToggleMenu();
+          }
+        }}
         className="home-app-tile theme-text group relative z-20 flex h-[132px] w-full cursor-pointer flex-col items-center justify-center gap-2.5 rounded-[22px] p-3.5 outline-none"
       >
+        {/* Pin / Favorite Toggle Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePinApp(state.app.id);
+          }}
+          title={isPinned ? t('home.unpinApp') : t('home.pinApp')}
+          aria-label={isPinned ? t('home.unpinApp') : t('home.pinApp')}
+          className={`absolute left-2.5 top-2.5 z-10 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full text-[11px] transition ${
+            isPinned
+              ? 'text-amber-400 opacity-100'
+              : 'theme-text-muted opacity-0 group-hover:opacity-80 hover:!opacity-100'
+          }`}
+        >
+          ★
+        </button>
+
         {isUpdateAvailable && (
           <span
             title={t('status.updateAvailable')}
@@ -168,6 +199,12 @@ export default function HomeAppCard({
             <ProgressBar
               progress={state.downloadProgress ?? 0}
               label={t(`status.${state.status}`)}
+              onCancel={
+                state.status === AppStatus.Downloading
+                  ? () => void cancelAppInstall(state.app.id)
+                  : undefined
+              }
+              cancelTitle={t('app.cancelDownload')}
             />
           </div>
         ) : (
@@ -175,7 +212,7 @@ export default function HomeAppCard({
             {state.app.name}
           </span>
         )}
-      </button>
+      </div>
 
       {/* Darker Coupled Dropdown Menu (Appears Only When Clicking the App Card) */}
       {!activeProgress && (
@@ -233,6 +270,22 @@ export default function HomeAppCard({
                 <UpdateMicroIcon />
               </button>
             )}
+
+            {/* Details / Options Button */}
+            <button
+              type="button"
+              tabIndex={menuOpen ? 0 : -1}
+              title={t('app.viewDetails')}
+              aria-label={t('app.viewDetails')}
+              onClick={(event) => {
+                event.stopPropagation();
+                onCloseMenu();
+                openAppDetails(state.app.id);
+              }}
+              className="theme-pill-interactive flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[11px] font-bold active:scale-95"
+            >
+              ⋯
+            </button>
 
             {/* Red Circular Uninstall Button */}
             <button

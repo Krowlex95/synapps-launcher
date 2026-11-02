@@ -29,6 +29,12 @@ pub fn run() {
             commands::github::sync_all_apps,
             commands::installer::install_app,
             commands::installer::uninstall_app,
+            commands::installer::cancel_install,
+            commands::installer::open_app_folder,
+            commands::installer::create_desktop_shortcut,
+            commands::installer::get_app_disk_usage,
+            commands::installer::link_existing_app,
+            commands::installer::scan_system_apps,
             commands::launcher::launch_app,
             commands::recent_files::get_recent_files,
             commands::recent_files::add_recent_files,
@@ -47,10 +53,71 @@ pub fn run() {
             commands::settings::import_custom_theme,
             commands::settings::export_custom_theme,
             commands::settings::open_themes_folder,
+            commands::settings::fetch_community_themes,
             commands::updater::check_launcher_update,
+            commands::updater::install_launcher_update,
             commands::get_catalog,
         ])
         .setup(|app| {
+            // Initialize System Tray icon & quick menu
+            {
+                use tauri::menu::{Menu, MenuItem};
+                use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+
+                let show_item =
+                    MenuItem::with_id(app, "tray_show", "Abrir Synapps Launcher", true, None::<&str>);
+                let hide_item =
+                    MenuItem::with_id(app, "tray_hide", "Minimizar para a bandeja", true, None::<&str>);
+                let quit_item =
+                    MenuItem::with_id(app, "tray_quit", "Sair", true, None::<&str>);
+
+                if let (Ok(show_i), Ok(hide_i), Ok(quit_i)) = (show_item, hide_item, quit_item) {
+                    if let Ok(menu) = Menu::with_items(app, &[&show_i, &hide_i, &quit_i]) {
+                        let mut builder = TrayIconBuilder::new()
+                            .tooltip("Synapps Launcher")
+                            .menu(&menu)
+                            .show_menu_on_left_click(false)
+                            .on_menu_event(|app_handle, event| match event.id.as_ref() {
+                                "tray_show" => {
+                                    if let Some(win) = app_handle.get_webview_window("main") {
+                                        let _ = win.show();
+                                        let _ = win.unminimize();
+                                        let _ = win.set_focus();
+                                    }
+                                }
+                                "tray_hide" => {
+                                    if let Some(win) = app_handle.get_webview_window("main") {
+                                        let _ = win.hide();
+                                    }
+                                }
+                                "tray_quit" => {
+                                    app_handle.exit(0);
+                                }
+                                _ => {}
+                            })
+                            .on_tray_icon_event(|tray, event| {
+                                if let TrayIconEvent::Click {
+                                    button: MouseButton::Left,
+                                    button_state: MouseButtonState::Up,
+                                    ..
+                                } = event
+                                {
+                                    if let Some(win) = tray.app_handle().get_webview_window("main")
+                                    {
+                                        let _ = win.show();
+                                        let _ = win.unminimize();
+                                        let _ = win.set_focus();
+                                    }
+                                }
+                            });
+
+                        if let Some(icon) = app.default_window_icon() {
+                            builder = builder.icon(icon.clone());
+                        }
+                        let _ = builder.build(app);
+                    }
+                }
+            }
             if let Some(window) = app.handle().get_webview_window("main") {
                 #[cfg(target_os = "windows")]
                 {

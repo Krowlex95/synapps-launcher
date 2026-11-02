@@ -1,29 +1,52 @@
 import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import {
+  checkLauncherUpdate,
+  installLauncherUpdate,
+  listenLauncherUpdateProgress,
+  type LauncherUpdateInfo,
+  type LauncherUpdateProgress,
+} from '../lib/tauri';
 
-export interface LauncherUpdateInfo {
-  current_version: string;
-  latest_version: string;
-  update_available: boolean;
-  release_notes?: string;
-  download_url?: string;
-}
+export type { LauncherUpdateInfo, LauncherUpdateProgress };
 
 export function useLauncherUpdate() {
   const [update, setUpdate] = useState<LauncherUpdateInfo | null>(null);
   const [isChecking, setIsChecking] = useState(true);
+  const [isInstalling, setIsInstalling] = useState(false);
+  const [progress, setProgress] = useState<LauncherUpdateProgress | null>(null);
 
-  const checkUpdate = async () => {
+  const checkUpdate = async (): Promise<LauncherUpdateInfo | null> => {
     setIsChecking(true);
     try {
-      const info: LauncherUpdateInfo = await invoke('check_launcher_update');
-      if (info.update_available) {
+      const info = await checkLauncherUpdate();
+      if (info && info.update_available) {
         setUpdate(info);
+      } else {
+        setUpdate(null);
       }
+      return info;
     } catch (e) {
       console.warn('[Synapps] Failed to check for updates:', e);
+      return null;
     } finally {
       setIsChecking(false);
+    }
+  };
+
+  const triggerInstallUpdate = async (downloadUrl?: string) => {
+    if (isInstalling) return;
+    setIsInstalling(true);
+    setProgress({ downloaded: 0, total: 0, progress: 0, speedBps: 0 });
+    const unlisten = await listenLauncherUpdateProgress((payload) => {
+      setProgress(payload);
+    });
+    try {
+      await installLauncherUpdate(downloadUrl ?? update?.download_url);
+    } catch (e) {
+      setIsInstalling(false);
+      setProgress(null);
+      unlisten();
+      throw e;
     }
   };
 
@@ -31,5 +54,13 @@ export function useLauncherUpdate() {
     void checkUpdate();
   }, []);
 
-  return { update, isChecking, checkUpdate, setUpdate };
+  return {
+    update,
+    isChecking,
+    isInstalling,
+    progress,
+    checkUpdate,
+    triggerInstallUpdate,
+    setUpdate,
+  };
 }

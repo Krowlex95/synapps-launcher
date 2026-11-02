@@ -9,6 +9,8 @@ import AppGrid from './components/apps/AppGrid';
 import SettingsPanel from './components/settings/SettingsPanel';
 import SetupDialog from './components/onboarding/SetupDialog';
 import NotificationHost from './components/common/Notification';
+import AppDetailsModal from './components/apps/AppDetailsModal';
+import CommandPalette from './components/common/CommandPalette';
 import {
   CategoryIcon,
   ChevronDownIcon,
@@ -31,7 +33,13 @@ export default function App() {
   const { t } = useTranslation();
   useTheme();
   useDownload();
-  const { update, setUpdate } = useLauncherUpdate();
+  const {
+    update,
+    setUpdate,
+    isInstalling: isInstallingLauncherUpdate,
+    progress: launcherUpdateProgress,
+    triggerInstallUpdate,
+  } = useLauncherUpdate();
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>(Category.Home);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategories, setFilterCategories] = useState<Category[]>([]);
@@ -39,6 +47,7 @@ export default function App() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const filterPopoverRef = useRef<HTMLDivElement>(null);
 
   const effectiveSearchQuery = selectedCategory === Category.All ? searchQuery : '';
@@ -52,6 +61,7 @@ export default function App() {
   const syncApps = useAppStore((state) => state.syncApps);
   const setInstallComplete = useAppStore((state) => state.setInstallComplete);
   const setInstallError = useAppStore((state) => state.setInstallError);
+  const scanSystemForApps = useAppStore((state) => state.scanSystemForApps);
   const { apps, isLoading, error } = useApps(
     selectedCategory,
     effectiveSearchQuery,
@@ -59,6 +69,17 @@ export default function App() {
     effectiveFilterDevelopers,
   );
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!filterOpen) return;
@@ -172,13 +193,13 @@ export default function App() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-lg bg-primary px-4 py-2 font-semibold text-white transition hover:brightness-110"
-                onClick={() => {
-                  setUpdate(null);
-                  window.location.reload();
-                }}
+                disabled={isInstallingLauncherUpdate}
+                className="cursor-pointer rounded-lg bg-primary px-4 py-2 font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+                onClick={() => void triggerInstallUpdate()}
               >
-                {t('common.updateNow')}
+                {isInstallingLauncherUpdate
+                  ? `${t('settings.downloadingUpdate')} (${launcherUpdateProgress?.progress ?? 0}%)`
+                  : t('common.updateNow')}
               </button>
               <button
                 type="button"
@@ -235,6 +256,19 @@ export default function App() {
               {/* Search Bar + Filter Dropdown Exclusively in the "All Apps" Menu */}
               {selectedCategory === Category.All && (
                 <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => void scanSystemForApps()}
+                    title={t('app.scanSystemApps')}
+                    className="frosted-panel theme-text-secondary hover:text-[var(--color-text)] flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-3.5 text-xs font-medium transition hover:bg-[var(--item-hover-bg)]"
+                  >
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="9" cy="9" r="5.5" />
+                      <path d="M13.5 13.5 17 17" />
+                    </svg>
+                    <span>{t('app.scanSystemApps')}</span>
+                  </button>
+
                   <div ref={filterPopoverRef} className="relative">
                     <button
                       type="button"
@@ -435,6 +469,13 @@ export default function App() {
       </MainContent>
 
       <SettingsPanel open={settingsOpen} onClose={closeSettings} />
+      <AppDetailsModal />
+      <CommandPalette
+        open={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onSelectCategory={setSelectedCategory}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
       <SetupDialog open={firstRun} />
       <NotificationHost />
     </div>

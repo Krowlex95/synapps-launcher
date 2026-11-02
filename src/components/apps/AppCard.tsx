@@ -25,6 +25,8 @@ function formatVersion(version: string): string {
 export default function AppCard({ state }: AppCardProps) {
   const { t } = useTranslation();
   const launchApp = useAppStore((store) => store.launchApp);
+  const cancelAppInstall = useAppStore((store) => store.cancelAppInstall);
+  const openAppDetails = useAppStore((store) => store.openAppDetails);
   const [failed, setFailed] = useState(false);
 
   const imgSrc = state.app.iconUrl || `/icons/apps/${state.app.id}.png`;
@@ -83,10 +85,22 @@ export default function AppCard({ state }: AppCardProps) {
         <div className="pointer-events-none absolute inset-0 rounded-[16px] ring-1 ring-inset ring-black/10 dark:ring-white/14" />
       </div>
 
-      {/* Middle: App Name, Developer/Version & Brief Description */}
-      <div className="min-w-0 flex-1">
+      {/* Middle: App Name, Developer/Version & Brief Description (Click for Details Modal) */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => openAppDetails(state.app.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openAppDetails(state.app.id);
+          }
+        }}
+        title={t('app.viewDetails')}
+        className="min-w-0 flex-1 cursor-pointer outline-none"
+      >
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="theme-text truncate text-[14.5px] font-bold leading-snug tracking-tight">
+          <h2 className="theme-text truncate text-[14.5px] font-bold leading-snug tracking-tight group-hover:underline decoration-[var(--color-primary)]/50 underline-offset-2">
             {state.app.name}
           </h2>
           <span className="theme-text-muted shrink-0 text-[11px] font-medium">
@@ -115,10 +129,19 @@ export default function AppCard({ state }: AppCardProps) {
       {/* Right: Actions or Active Download Progress */}
       <div className="shrink-0 pl-2">
         {activeProgress ? (
-          <div className="w-40 sm:w-48">
+          <div className="w-44 sm:w-56">
             <ProgressBar
               progress={state.downloadProgress ?? 0}
               label={t(`status.${state.status}`)}
+              downloadedBytes={state.downloadedBytes}
+              totalBytes={state.totalBytes}
+              speedBps={state.downloadSpeedBps}
+              onCancel={
+                state.status === AppStatus.Downloading
+                  ? () => void cancelAppInstall(state.app.id)
+                  : undefined
+              }
+              cancelTitle={t('app.cancelDownload')}
             />
           </div>
         ) : (

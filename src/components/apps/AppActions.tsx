@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next';
+import { openAppFolder } from '../../lib/tauri';
+import { notify } from '../../lib/notifications';
 import { AppStatus, type AppState } from '../../lib/types';
 import { useAppStore } from '../../stores/appStore';
+import { FolderIcon } from '../common/SidebarIcons';
 
 interface AppActionsProps {
   state: AppState;
@@ -35,6 +38,15 @@ export default function AppActions({ state }: AppActionsProps) {
   const install = useAppStore((store) => store.installApp);
   const uninstall = useAppStore((store) => store.uninstallApp);
   const launch = useAppStore((store) => store.launchApp);
+  const openDetails = useAppStore((store) => store.openAppDetails);
+
+  const handleOpenFolder = async () => {
+    try {
+      await openAppFolder(state.app.id);
+    } catch (err) {
+      notify({ variant: 'error', message: String(err) });
+    }
+  };
 
   if (state.status === AppStatus.ComingSoon) {
     return (
@@ -50,7 +62,7 @@ export default function AppActions({ state }: AppActionsProps) {
 
   if (state.status === AppStatus.UpdateAvailable) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <button
           type="button"
           className={`${btnBase} rounded-xl bg-[#4ade80] px-4 font-bold text-[#052010] shadow-sm hover:bg-[#22c55e]`}
@@ -67,6 +79,15 @@ export default function AppActions({ state }: AppActionsProps) {
         </button>
         <button
           type="button"
+          title={t('app.openFolder')}
+          aria-label={t('app.openFolder')}
+          className={`${btnBase} theme-pill-interactive w-8 rounded-full`}
+          onClick={() => void handleOpenFolder()}
+        >
+          <FolderIcon className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
           title={t('app.uninstall')}
           aria-label={t('app.uninstall')}
           className={`${btnBase} w-8 rounded-full bg-[#ef4444] text-white shadow-sm hover:bg-[#dc2626]`}
@@ -80,13 +101,22 @@ export default function AppActions({ state }: AppActionsProps) {
 
   if (state.status === AppStatus.Installed) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <button
           type="button"
           className={`${btnBase} rounded-xl bg-[#4ade80] px-4 font-bold text-[#052010] shadow-sm hover:bg-[#22c55e]`}
           onClick={() => void launch(state.app.id)}
         >
           {t('home.startApp')}
+        </button>
+        <button
+          type="button"
+          title={t('app.openFolder')}
+          aria-label={t('app.openFolder')}
+          className={`${btnBase} theme-pill-interactive w-8 rounded-full`}
+          onClick={() => void handleOpenFolder()}
+        >
+          <FolderIcon className="h-3.5 w-3.5" />
         </button>
         <button
           type="button"
@@ -102,12 +132,23 @@ export default function AppActions({ state }: AppActionsProps) {
   }
 
   return (
-    <button
-      type="button"
-      className={`${btnBase} theme-pill-interactive rounded-xl px-4`}
-      onClick={() => void install(state.app.id)}
-    >
-      {t('app.install')}
-    </button>
+    <div className="flex items-center gap-1.5">
+      <button
+        type="button"
+        className={`${btnBase} theme-pill-interactive rounded-xl px-4`}
+        onClick={() => void install(state.app.id)}
+      >
+        {t('app.install')}
+      </button>
+      <button
+        type="button"
+        title={t('app.viewDetails')}
+        aria-label={t('app.viewDetails')}
+        className={`${btnBase} theme-pill-interactive w-8 rounded-xl text-xs font-bold`}
+        onClick={() => openDetails(state.app.id)}
+      >
+        ⋯
+      </button>
+    </div>
   );
 }

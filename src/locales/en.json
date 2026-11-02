@@ -57,7 +57,24 @@
     "filter": "Filter",
     "clearFilters": "Clear filters",
     "filterByCategory": "Categories",
-    "filterByDeveloper": "Developers"
+    "filterByDeveloper": "Developers",
+    "viewDetails": "Details & options",
+    "cancelDownload": "Cancel download",
+    "updateAll": "Update all",
+    "scanSystemApps": "Scan PC",
+    "diskSize": "Disk usage",
+    "lastUsed": "Last used",
+    "compatibleFormats": "Compatible formats",
+    "createDesktopShortcut": "Create Desktop shortcut",
+    "shortcutCreated": "Shortcut created!",
+    "locateExisting": "Link existing install"
+  },
+  "commandPalette": {
+    "placeholder": "Search apps, launch programs, or run commands (Ctrl+K)...",
+    "scanSubtitle": "Scan Windows for catalog apps already installed on your PC",
+    "actionBadge": "Action",
+    "navSubtitle": "Navigate launcher",
+    "navBadge": "Go to"
   },
   "settings": {
     "title": "Settings",
@@ -73,6 +90,10 @@
     "language": "Language",
     "about": "About",
     "checkUpdate": "Check for updates",
+    "checkingUpdate": "Checking for updates...",
+    "upToDate": "You are on the latest version (v{{version}}).",
+    "installUpdateNow": "Update now to {{version}} & restart",
+    "downloadingUpdate": "Downloading & installing update...",
     "version": "Version",
     "close": "Close settings",
     "saved": "Settings saved.",
@@ -123,6 +144,8 @@
       "savedSuccess": "Theme \"{{name}}\" saved and applied!",
       "importedSuccess": "Theme \"{{name}}\" installed successfully!",
       "exportedSuccess": "Theme \"{{name}}\" exported successfully!",
+      "onlineGallery": "Online Gallery",
+      "onlineGalleryTitle": "Official Community Themes (GitHub)",
       "fields": {
         "bgColor": "Window background",
         "surfaceColor": "Surface / Cards",
@@ -171,7 +194,10 @@
     "clearSearch": "Clear search",
     "navigation": "Navigation",
     "apply": "Apply",
-    "invalidColor": "Enter a valid hexadecimal color."
+    "invalidColor": "Enter a valid hexadecimal color.",
+    "updateAvailable": "New Synapps version available ({{version}})",
+    "updateNotes": "Click to download and update the launcher automatically.",
+    "updateNow": "Update now"
   },
   "status": {
     "notInstalled": "Not installed",
@@ -188,7 +214,11 @@
     "updated": "App updated.",
     "installError": "Installation failed.",
     "uninstallError": "Uninstallation failed.",
-    "launchError": "Could not launch the app."
+    "launchError": "Could not launch the app.",
+    "downloadCancelled": "Download cancelled.",
+    "linkedExisting": "Existing installation linked!",
+    "scannedSystemFound": "{{count}} installed app(s) detected on your PC!",
+    "scannedSystemNone": "No new installed apps found in standard directories."
   },
   "categories": {
     "home": "Home",
@@ -218,7 +248,9 @@
     "openError": "Could not open this file.",
     "today": "Today",
     "yesterday": "Yesterday",
-    "daysAgo": "{{count}} days ago"
+    "daysAgo": "{{count}} days ago",
+    "pinApp": "Pin to top",
+    "unpinApp": "Unpin"
   },
   "apps": {
     "photocraft": {

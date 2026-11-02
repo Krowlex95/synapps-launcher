@@ -1,4 +1,4 @@
-use crate::commands::github::{fetch_latest_release, get_current_install_dir};
+use crate::commands::github::{fetch_latest_release, get_current_install_dir, get_installed_manifest};
 use crate::error::AppError;
 use crate::models::{get_app_catalog, AppManifest};
 use crate::state::AppState;
@@ -7,6 +7,8 @@ use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Instant;
 use tauri::{AppHandle, Emitter, State, Window};
 use tauri_plugin_notification::NotificationExt;
@@ -21,6 +23,8 @@ pub struct DownloadProgressPayload {
     pub progress: f64,
     pub downloaded: u64,
     pub total: u64,
+    #[serde(default)]
+    pub speed_bps: u64,
     pub phase: String,
 }
 
@@ -415,6 +419,7 @@ pub async fn install_app(
                 progress: 50.0,
                 downloaded: 1,
                 total: 1,
+                speed_bps: 0,
                 phase: "installing".to_string(),
             },
         );
@@ -443,6 +448,7 @@ pub async fn install_app(
                 progress: 100.0,
                 downloaded: 1,
                 total: 1,
+                speed_bps: 0,
                 phase: "installing".to_string(),
             },
         );
@@ -487,9 +493,19 @@ pub async fn install_app(
         return Err(AppError::InstallFailed(err_msg));
     }
 
+    let cancel_flag = Arc::new(AtomicBool::new(false));
+    if let Ok(mut flags) = state.download_cancel_flags.lock() {
+        flags.insert(app_id.clone(), cancel_flag.clone());
+    }
+
     let mut last_error: Option<String> = None;
+    let mut was_cancelled = false;
 
     for asset in &candidates {
+        if cancel_flag.load(Ordering::Relaxed) {
+            was_cancelled = true;
+            break;
+        }
         log::info!("Attempting installation with candidate asset: {}", asset.name);
 
         let temp_dir = std::env::temp_dir().join("synapps_downloads");
@@ -511,6 +527,7 @@ pub async fn install_app(
             let mut stream = response.bytes_stream();
             let mut file = tokio::fs::File::create(&part_path).await?;
             let mut downloaded: u64 = 0;
+            let start_time = Instant::now();
             let mut last_emit = Instant::now();
 
             let _ = app_handle.emit(
@@ -520,11 +537,18 @@ pub async fn install_app(
                     progress: 0.0,
                     downloaded: 0,
                     total: total_size,
+                    speed_bps: 0,
                     phase: "downloading".to_string(),
                 },
             );
 
             while let Some(chunk_res) = stream.next().await {
+                if cancel_flag.load(Ordering::Relaxed) {
+                    drop(file);
+                    let _ = tokio::fs::remove_file(&part_path).await;
+                    return Err(AppError::InstallFailed("__CANCELLED__".to_string()));
+                }
+
                 let chunk = chunk_res?;
                 file.write_all(&chunk).await?;
                 downloaded += chunk.len() as u64;
@@ -535,6 +559,12 @@ pub async fn install_app(
                     } else {
                         50.0
                     };
+                    let elapsed_secs = start_time.elapsed().as_secs_f64();
+                    let speed_bps = if elapsed_secs > 0.05 {
+                        (downloaded as f64 / elapsed_secs) as u64
+                    } else {
+                        0
+                    };
                     let _ = app_handle.emit(
                         "download-progress",
                         DownloadProgressPayload {
@@ -542,6 +572,7 @@ pub async fn install_app(
                             progress,
                             downloaded,
                             total: total_size,
+                            speed_bps,
                             phase: "downloading".to_string(),
                         },
                     );
@@ -568,9 +599,14 @@ pub async fn install_app(
         .await;
 
         if let Err(e) = download_result {
+            let err_str = e.to_string();
+            let _ = tokio::fs::remove_file(&part_path).await;
+            if err_str.contains("__CANCELLED__") || cancel_flag.load(Ordering::Relaxed) {
+                was_cancelled = true;
+                break;
+            }
             let msg = format!("Download failed for {}: {}", asset.name, e);
             log::warn!("{}. Trying next candidate...", msg);
-            let _ = tokio::fs::remove_file(&part_path).await;
             last_error = Some(msg);
             continue;
         }
@@ -592,6 +628,7 @@ pub async fn install_app(
                 progress: 100.0,
                 downloaded: 0,
                 total: 0,
+                speed_bps: 0,
                 phase: "installing".to_string(),
             },
         );
@@ -740,6 +777,9 @@ pub async fn install_app(
 
         // Clean temporary archive after successful installation
         let _ = tokio::fs::remove_file(&download_path).await;
+        if let Ok(mut flags) = state.download_cancel_flags.lock() {
+            flags.remove(&app_id);
+        }
 
         let payload = InstallCompletePayload {
             app_id: app.id.clone(),
@@ -749,6 +789,15 @@ pub async fn install_app(
 
         let _ = app_handle.emit("install-complete", payload.clone());
         return Ok(payload);
+    }
+
+    if let Ok(mut flags) = state.download_cancel_flags.lock() {
+        flags.remove(&app_id);
+    }
+
+    if was_cancelled {
+        let cancel_msg = "__CANCELLED__".to_string();
+        return Err(AppError::InstallFailed(cancel_msg));
     }
 
     let final_err = last_error
@@ -762,6 +811,326 @@ pub async fn install_app(
         },
     );
     Err(AppError::InstallFailed(final_err))
+}
+
+#[tauri::command]
+pub async fn cancel_install(
+    app_id: String,
+    state: State<'_, AppState>,
+) -> Result<(), AppError> {
+    log::info!("Cancelling installation for app: {}", app_id);
+    if let Ok(flags) = state.download_cancel_flags.lock() {
+        if let Some(flag) = flags.get(&app_id) {
+            flag.store(true, Ordering::Relaxed);
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn open_app_folder(
+    app_id: String,
+    state: State<'_, AppState>,
+    app_handle: AppHandle,
+) -> Result<(), AppError> {
+    let install_dir = get_current_install_dir(&app_handle, &state);
+    let mut folder_to_open = install_dir.join(&app_id);
+
+    if let Some(manifest) = get_installed_manifest(&install_dir, &app_id) {
+        let exe_path = PathBuf::from(&manifest.executable_path);
+        if exe_path.exists() {
+            if let Some(parent) = exe_path.parent() {
+                folder_to_open = parent.to_path_buf();
+            }
+        }
+    }
+
+    if !folder_to_open.exists() {
+        return Err(AppError::ExecutionFailed(format!(
+            "Diretório do aplicativo '{}' não encontrado.",
+            app_id
+        )));
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg(&folder_to_open)
+            .spawn()?;
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = open::that(&folder_to_open);
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn create_desktop_shortcut(
+    app_id: String,
+    state: State<'_, AppState>,
+    app_handle: AppHandle,
+) -> Result<(), AppError> {
+    let catalog = get_app_catalog();
+    let app = catalog
+        .iter()
+        .find(|a| a.id.eq_ignore_ascii_case(&app_id))
+        .ok_or_else(|| AppError::AppNotFound(app_id.clone()))?;
+
+    let install_dir = get_current_install_dir(&app_handle, &state);
+    let app_dir = install_dir.join(&app_id);
+    let mut exe_path: Option<PathBuf> = None;
+
+    if let Some(manifest) = get_installed_manifest(&install_dir, &app_id) {
+        let p = PathBuf::from(&manifest.executable_path);
+        if p.is_file() {
+            exe_path = Some(p);
+        }
+    }
+    if exe_path.is_none() {
+        exe_path = find_executable(&app_dir, &app_id);
+    }
+
+    let exe_path = exe_path.ok_or_else(|| {
+        AppError::ExecutionFailed(format!("Executável de {} não encontrado.", app.name))
+    })?;
+
+    let desktop_dir = dirs::desktop_dir().ok_or_else(|| {
+        AppError::ExecutionFailed("Não foi possível localizar a Área de Trabalho.".to_string())
+    })?;
+    let shortcut_path = desktop_dir.join(format!("{}.lnk", app.name));
+
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        let work_dir = exe_path.parent().unwrap_or(&app_dir);
+        let ps_script = format!(
+            "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('{}'); $s.TargetPath = '{}'; $s.WorkingDirectory = '{}'; $s.Save()",
+            shortcut_path.to_string_lossy().replace('\'', "''"),
+            exe_path.to_string_lossy().replace('\'', "''"),
+            work_dir.to_string_lossy().replace('\'', "''")
+        );
+        let status = std::process::Command::new("powershell")
+            .args(["-NoProfile", "-NonInteractive", "-Command", &ps_script])
+            .creation_flags(CREATE_NO_WINDOW)
+            .status()?;
+
+        if !status.success() {
+            return Err(AppError::ExecutionFailed(
+                "Falha ao criar atalho na Área de Trabalho.".to_string(),
+            ));
+        }
+    }
+
+    Ok(())
+}
+
+fn compute_dir_size(dir: &Path, depth: usize, max_depth: usize) -> u64 {
+    if depth > max_depth {
+        return 0;
+    }
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return 0;
+    };
+    let mut total: u64 = 0;
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if let Ok(meta) = entry.metadata() {
+            if meta.is_file() {
+                total = total.saturating_add(meta.len());
+            } else if meta.is_dir() {
+                total = total.saturating_add(compute_dir_size(&path, depth + 1, max_depth));
+            }
+        }
+    }
+    total
+}
+
+#[tauri::command]
+pub async fn get_app_disk_usage(
+    app_id: String,
+    state: State<'_, AppState>,
+    app_handle: AppHandle,
+) -> Result<u64, AppError> {
+    let install_dir = get_current_install_dir(&app_handle, &state);
+    let app_dir = install_dir.join(&app_id);
+
+    let target_dir = if let Some(manifest) = get_installed_manifest(&install_dir, &app_id) {
+        let exe_path = PathBuf::from(&manifest.executable_path);
+        if manifest.asset_name == "external-linked" {
+            exe_path.parent().map(|p| p.to_path_buf()).unwrap_or(app_dir)
+        } else {
+            app_dir
+        }
+    } else {
+        app_dir
+    };
+
+    if !target_dir.exists() {
+        return Ok(0);
+    }
+
+    let bytes = tokio::task::spawn_blocking(move || compute_dir_size(&target_dir, 0, 5))
+        .await
+        .unwrap_or(0);
+    Ok(bytes)
+}
+
+#[tauri::command]
+pub async fn link_existing_app(
+    app_id: String,
+    state: State<'_, AppState>,
+    app_handle: AppHandle,
+) -> Result<Option<InstallCompletePayload>, AppError> {
+    use tauri_plugin_dialog::DialogExt;
+
+    let catalog = get_app_catalog();
+    let app = catalog
+        .iter()
+        .find(|a| a.id.eq_ignore_ascii_case(&app_id))
+        .ok_or_else(|| AppError::AppNotFound(app_id.clone()))?;
+
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    app_handle
+        .dialog()
+        .file()
+        .set_title(&format!("Localizar executável de {}", app.name))
+        .add_filter("Aplicativo Executável (*.exe)", &["exe"])
+        .pick_file(move |picked| {
+            let path_opt = picked.and_then(|fp| match fp {
+                tauri_plugin_dialog::FilePath::Path(p) => Some(p),
+                _ => None,
+            });
+            let _ = tx.send(path_opt);
+        });
+
+    let Some(exe_path) = rx.await.ok().flatten() else {
+        return Ok(None);
+    };
+
+    let install_dir = get_current_install_dir(&app_handle, &state);
+    let target_app_dir = install_dir.join(&app.id);
+    tokio::fs::create_dir_all(&target_app_dir).await?;
+
+    let latest_ver = crate::commands::github::fetch_latest_version_tag(&app.repo, &state)
+        .await
+        .unwrap_or_else(|| "Sistema".to_string());
+
+    let manifest = AppManifest {
+        app_id: app.id.clone(),
+        version: latest_ver.clone(),
+        installed_at: chrono_like_now(),
+        executable_path: exe_path.to_string_lossy().to_string(),
+        asset_name: "external-linked".to_string(),
+    };
+    let manifest_json = serde_json::to_string_pretty(&manifest)?;
+    tokio::fs::write(target_app_dir.join("manifest.json"), manifest_json).await?;
+
+    let payload = InstallCompletePayload {
+        app_id: app.id.clone(),
+        version: latest_ver.clone(),
+        installed_version: latest_ver,
+    };
+    let _ = app_handle.emit("install-complete", payload.clone());
+    Ok(Some(payload))
+}
+
+#[tauri::command]
+pub async fn scan_system_apps(
+    state: State<'_, AppState>,
+    app_handle: AppHandle,
+) -> Result<Vec<InstallCompletePayload>, AppError> {
+    let install_dir = get_current_install_dir(&app_handle, &state);
+    let catalog = get_app_catalog();
+    let mut newly_linked = Vec::new();
+
+    #[cfg(target_os = "windows")]
+    {
+        let mut search_roots = Vec::new();
+        if let Ok(pf) = std::env::var("ProgramFiles") {
+            search_roots.push(PathBuf::from(pf));
+        }
+        if let Ok(pf86) = std::env::var("ProgramFiles(x86)") {
+            search_roots.push(PathBuf::from(pf86));
+        }
+        if let Ok(local_app) = std::env::var("LOCALAPPDATA") {
+            let local_path = PathBuf::from(&local_app);
+            search_roots.push(local_path.join("Programs"));
+            search_roots.push(local_path);
+        }
+
+        let known_locations: &[(&str, &[&str])] = &[
+            ("blender", &["Blender Foundation\\Blender 4.3\\blender.exe", "Blender Foundation\\Blender 4.2\\blender.exe", "Blender Foundation\\Blender 4.1\\blender.exe", "Blender Foundation\\Blender 4.0\\blender.exe", "Blender Foundation\\Blender\\blender.exe"]),
+            ("gimp", &["GIMP 3\\bin\\gimp-3.0.exe", "GIMP 2\\bin\\gimp-2.10.exe", "GIMP\\bin\\gimp.exe"]),
+            ("krita", &["Krita (x64)\\bin\\krita.exe", "Krita\\bin\\krita.exe"]),
+            ("obs", &["obs-studio\\bin\\64bit\\obs64.exe"]),
+            ("audacity", &["Audacity\\Audacity.exe"]),
+            ("shotcut", &["Shotcut\\shotcut.exe"]),
+            ("freecad", &["FreeCAD 1.0\\bin\\freecad.exe", "FreeCAD\\bin\\freecad.exe"]),
+            ("librecad", &["LibreCAD\\LibreCAD.exe"]),
+            ("sharex", &["ShareX\\ShareX.exe"]),
+            ("imageglass", &["ImageGlass\\ImageGlass.exe"]),
+            ("onlyoffice", &["ONLYOFFICE\\DesktopEditors\\DesktopEditors.exe"]),
+            ("lmms", &["LMMS\\lmms.exe"]),
+            ("orcaslicer", &["OrcaSlicer\\orca-slicer.exe"]),
+            ("prusaslicer", &["Prusa3D\\PrusaSlicer\\prusa-slicer.exe"]),
+            ("fontforge", &["FontForgeBuilds\\run_fontforge.exe", "FontForgeBuilds\\bin\\fontforge.exe"]),
+            ("upscayl", &["Upscayl\\Upscayl.exe", "upscayl\\Upscayl.exe"]),
+            ("superproductivity", &["superProductivity\\Super Productivity.exe", "Super Productivity\\Super Productivity.exe"]),
+            ("appflowy", &["AppFlowy\\AppFlowy.exe"]),
+            ("affine", &["AFFiNE\\AFFiNE.exe"]),
+            ("blockbench", &["Blockbench\\Blockbench.exe"]),
+        ];
+
+        for (app_id, rel_paths) in known_locations {
+            if get_installed_manifest(&install_dir, app_id).is_some() {
+                continue;
+            }
+            let mut found_exe: Option<PathBuf> = None;
+            for root in &search_roots {
+                for rel in *rel_paths {
+                    let candidate = root.join(rel);
+                    if candidate.is_file() {
+                        found_exe = Some(candidate);
+                        break;
+                    }
+                }
+                if found_exe.is_some() {
+                    break;
+                }
+            }
+
+            if let Some(exe_path) = found_exe {
+                if let Some(app) = catalog.iter().find(|a| a.id == *app_id) {
+                    let target_app_dir = install_dir.join(&app.id);
+                    let _ = tokio::fs::create_dir_all(&target_app_dir).await;
+                    let ver = crate::commands::github::fetch_latest_version_tag(&app.repo, &state)
+                        .await
+                        .unwrap_or_else(|| "Sistema".to_string());
+                    let manifest = AppManifest {
+                        app_id: app.id.clone(),
+                        version: ver.clone(),
+                        installed_at: chrono_like_now(),
+                        executable_path: exe_path.to_string_lossy().to_string(),
+                        asset_name: "external-linked".to_string(),
+                    };
+                    if let Ok(json) = serde_json::to_string_pretty(&manifest) {
+                        let _ = tokio::fs::write(target_app_dir.join("manifest.json"), json).await;
+                        let payload = InstallCompletePayload {
+                            app_id: app.id.clone(),
+                            version: ver.clone(),
+                            installed_version: ver,
+                        };
+                        let _ = app_handle.emit("install-complete", payload.clone());
+                        newly_linked.push(payload);
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(newly_linked)
 }
 
 #[tauri::command]

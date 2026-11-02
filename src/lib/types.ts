@@ -41,6 +41,9 @@ export interface AppState {
   installedVersion?: string;
   latestVersion?: string;
   downloadProgress?: number;
+  downloadedBytes?: number;
+  totalBytes?: number;
+  downloadSpeedBps?: number;
 }
 
 export interface Release {
@@ -108,6 +111,7 @@ export interface DownloadProgressEvent {
   progress: number;
   downloadedBytes?: number;
   totalBytes?: number;
+  speedBps?: number;
   phase?: 'downloading' | 'installing' | 'fallback';
 }
 

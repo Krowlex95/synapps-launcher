@@ -311,6 +311,119 @@ pub async fn open_themes_folder() -> Result<(), AppError> {
     Ok(())
 }
 
+/// Fetches community themes from the official GitHub repository (`Krowlex95/synapps-launcher/themes`)
+/// combined with the online gallery catalog.
+#[tauri::command]
+pub async fn fetch_community_themes(
+    state: State<'_, AppState>,
+) -> Result<Vec<CustomTheme>, AppError> {
+    let mut online_themes: Vec<CustomTheme> = Vec::new();
+
+    // 1. Try fetching dynamic `.json` files from GitHub repository `Krowlex95/synapps-launcher/themes`
+    let contents_url = "https://api.github.com/repos/Krowlex95/synapps-launcher/contents/themes";
+    if let Ok(resp) = state
+        .http_client
+        .get(contents_url)
+        .header("Accept", "application/vnd.github.v3+json")
+        .send()
+        .await
+    {
+        if resp.status().is_success() {
+            if let Ok(items) = resp.json::<Vec<serde_json::Value>>().await {
+                for item in items {
+                    if let Some(download_url) = item.get("download_url").and_then(|v| v.as_str()) {
+                        if download_url.ends_with(".json") {
+                            if let Ok(file_resp) = state.http_client.get(download_url).send().await
+                            {
+                                if let Ok(theme) = file_resp.json::<CustomTheme>().await {
+                                    if !online_themes.iter().any(|t| t.id == theme.id) {
+                                        online_themes.push(theme);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Include additional curated online gallery themes
+    let gallery_extras = vec![
+        CustomTheme {
+            id: "tokyo-night".to_string(),
+            name: "Tokyo Night".to_string(),
+            author: Some("Synapps Hub".to_string()),
+            version: "1.0.0".to_string(),
+            description: Some(
+                "Inspirado nas luzes noturnas de Tóquio com índigo profundo e azul elétrico."
+                    .to_string(),
+            ),
+            base_mode: "dark".to_string(),
+            bg_color: Some("#16161e".to_string()),
+            surface_color: Some("#1a1b26".to_string()),
+            popover_color: Some("#1f2335".to_string()),
+            accent_color: Some("#7aa2f7".to_string()),
+            icon_color: Some("#bb9af7".to_string()),
+            text_color: Some("#c0caf5".to_string()),
+            text_secondary_color: Some("#a9b1d6".to_string()),
+            border_color: Some("#292e42".to_string()),
+            variables: HashMap::new(),
+            custom_css: None,
+        },
+        CustomTheme {
+            id: "rose-pine".to_string(),
+            name: "Rosé Pine".to_string(),
+            author: Some("Synapps Hub".to_string()),
+            version: "1.0.0".to_string(),
+            description: Some(
+                "Estética orgânica sofisticada com pinho escuro, ouro suave e rosa seco."
+                    .to_string(),
+            ),
+            base_mode: "dark".to_string(),
+            bg_color: Some("#191724".to_string()),
+            surface_color: Some("#1f1d2e".to_string()),
+            popover_color: Some("#26233a".to_string()),
+            accent_color: Some("#ebbcba".to_string()),
+            icon_color: Some("#f6c177".to_string()),
+            text_color: Some("#e0def4".to_string()),
+            text_secondary_color: Some("#908caa".to_string()),
+            border_color: Some("#403d52".to_string()),
+            variables: HashMap::new(),
+            custom_css: None,
+        },
+        CustomTheme {
+            id: "emerald-matrix".to_string(),
+            name: "Emerald Studio".to_string(),
+            author: Some("Synapps Hub".to_string()),
+            version: "1.0.0".to_string(),
+            description: Some(
+                "Tema escuro de alto contraste com tons de ardósia e verde-esmeralda."
+                    .to_string(),
+            ),
+            base_mode: "dark".to_string(),
+            bg_color: Some("#071310".to_string()),
+            surface_color: Some("#0d211b".to_string()),
+            popover_color: Some("#0a1915".to_string()),
+            accent_color: Some("#10b981".to_string()),
+            icon_color: Some("#34d399".to_string()),
+            text_color: Some("#ecfdf5".to_string()),
+            text_secondary_color: Some("#a7f3d0".to_string()),
+            border_color: Some("#065f46".to_string()),
+            variables: HashMap::new(),
+            custom_css: None,
+        },
+    ];
+
+    for extra in gallery_extras {
+        if !online_themes.iter().any(|t| t.id == extra.id) {
+            online_themes.push(extra);
+        }
+    }
+
+    Ok(online_themes)
+}
+
 /// Retrieves the current user settings from memory or persistent storage.
 #[tauri::command]
 pub async fn get_settings(

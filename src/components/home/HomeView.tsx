@@ -109,10 +109,25 @@ export default function HomeView({ searchQuery, onExploreCatalog }: HomeViewProp
   const { t } = useTranslation();
   const appsMap = useAppStore((state) => state.apps);
   const isLoadingApps = useAppStore((state) => state.isLoading);
+  const isBatchUpdating = useAppStore((state) => state.isBatchUpdating);
+  const pinnedAppIds = useAppStore((state) => state.pinnedAppIds);
+  const lastLaunchedMap = useAppStore((state) => state.lastLaunchedMap);
+  const updateAllApps = useAppStore((state) => state.updateAllApps);
+  const scanSystemForApps = useAppStore((state) => state.scanSystemForApps);
 
   const [recentFiles, setRecentFiles] = useState<RecentFileItem[]>([]);
   const [loadingRecents, setLoadingRecents] = useState(true);
   const [openMenuAppId, setOpenMenuAppId] = useState<string | null>(null);
+  const [scanningSystem, setScanningSystem] = useState(false);
+
+  const handleScanSystem = async () => {
+    setScanningSystem(true);
+    try {
+      await scanSystemForApps();
+    } finally {
+      setScanningSystem(false);
+    }
+  };
 
   // Close open app card dropdown on outside click or Escape
   useEffect(() => {
@@ -174,7 +189,7 @@ export default function HomeView({ searchQuery, onExploreCatalog }: HomeViewProp
   const query = searchQuery.trim().toLocaleLowerCase();
 
   const installedApps = useMemo(() => {
-    return [...appsMap.values()].filter((state) => {
+    const filtered = [...appsMap.values()].filter((state) => {
       const active =
         state.status === AppStatus.Installed ||
         state.status === AppStatus.UpdateAvailable ||
@@ -188,7 +203,24 @@ export default function HomeView({ searchQuery, onExploreCatalog }: HomeViewProp
         state.app.developer.toLocaleLowerCase().includes(query)
       );
     });
-  }, [appsMap, query]);
+
+    return filtered.sort((a, b) => {
+      const aPinned = pinnedAppIds.includes(a.app.id) ? 1 : 0;
+      const bPinned = pinnedAppIds.includes(b.app.id) ? 1 : 0;
+      if (aPinned !== bPinned) return bPinned - aPinned;
+
+      const aLast = lastLaunchedMap[a.app.id] ?? 0;
+      const bLast = lastLaunchedMap[b.app.id] ?? 0;
+      if (aLast !== bLast) return bLast - aLast;
+
+      return a.app.name.localeCompare(b.app.name);
+    });
+  }, [appsMap, query, pinnedAppIds, lastLaunchedMap]);
+
+  const updatableCount = useMemo(
+    () => installedApps.filter((item) => item.status === AppStatus.UpdateAvailable).length,
+    [installedApps],
+  );
 
   const resolveInstalledAppForExtension = useCallback(
     (ext: string): AppState | undefined => {
@@ -311,13 +343,33 @@ export default function HomeView({ searchQuery, onExploreCatalog }: HomeViewProp
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={onExploreCatalog}
-            className="theme-pill-interactive cursor-pointer rounded-full px-3 py-1 text-xs font-medium"
-          >
-            {t('home.browseCatalog')}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {updatableCount > 0 && (
+              <button
+                type="button"
+                disabled={isBatchUpdating}
+                onClick={() => void updateAllApps()}
+                className="cursor-pointer rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-400 ring-1 ring-inset ring-amber-500/35 transition hover:bg-amber-500/30 disabled:opacity-50"
+              >
+                {t('app.updateAll', { count: updatableCount })}
+              </button>
+            )}
+            <button
+              type="button"
+              disabled={scanningSystem}
+              onClick={() => void handleScanSystem()}
+              className="theme-pill-interactive cursor-pointer rounded-full px-3 py-1 text-xs font-medium disabled:opacity-50"
+            >
+              {scanningSystem ? t('common.loading') : t('app.scanSystemApps')}
+            </button>
+            <button
+              type="button"
+              onClick={onExploreCatalog}
+              className="theme-pill-interactive cursor-pointer rounded-full px-3 py-1 text-xs font-medium"
+            >
+              {t('home.browseCatalog')}
+            </button>
+          </div>
         </div>
 
         {isLoadingApps && installedApps.length === 0 ? (

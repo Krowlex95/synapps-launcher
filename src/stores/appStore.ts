@@ -3,9 +3,12 @@ import i18n from '../lib/i18n';
 import { APP_CATALOG, INITIAL_APP_STATES } from '../lib/constants';
 import { notify } from '../lib/notifications';
 import {
+  cancelInstall as cancelInstallCommand,
   getLocalAppStates,
   installApp as installAppCommand,
   launchApp as launchAppCommand,
+  linkExistingApp,
+  scanSystemApps,
   syncAllApps,
   uninstallApp as uninstallAppCommand,
 } from '../lib/tauri';
@@ -17,12 +20,41 @@ import {
   type InstallErrorEvent,
 } from '../lib/types';
 
+function loadPinnedIds(): string[] {
+  try {
+    const raw = localStorage.getItem('synapps_pinned_apps');
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadLastLaunchedMap(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem('synapps_last_launched');
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 interface AppStore {
   apps: Map<string, AppState>;
   isLoading: boolean;
+  isBatchUpdating: boolean;
   error: string | null;
+  pinnedAppIds: string[];
+  lastLaunchedMap: Record<string, number>;
+  selectedDetailsAppId: string | null;
+  openAppDetails: (appId: string) => void;
+  closeAppDetails: () => void;
+  togglePinApp: (appId: string) => void;
   syncApps: () => Promise<void>;
   installApp: (appId: string) => Promise<void>;
+  cancelAppInstall: (appId: string) => Promise<void>;
+  updateAllApps: () => Promise<void>;
+  linkAppFromDisk: (appId: string) => Promise<void>;
+  scanSystemForApps: () => Promise<number>;
   uninstallApp: (appId: string) => Promise<void>;
   launchApp: (appId: string) => Promise<void>;
   updateDownloadProgress: (event: DownloadProgressEvent) => void;
@@ -69,7 +101,27 @@ function mergeSyncedItems(prev: Map<string, AppState>, items: any[]): Map<string
 export const useAppStore = create<AppStore>((set, get) => ({
   apps: new Map(INITIAL_APP_STATES),
   isLoading: false,
+  isBatchUpdating: false,
   error: null,
+  pinnedAppIds: loadPinnedIds(),
+  lastLaunchedMap: loadLastLaunchedMap(),
+  selectedDetailsAppId: null,
+
+  openAppDetails: (appId) => set({ selectedDetailsAppId: appId }),
+  closeAppDetails: () => set({ selectedDetailsAppId: null }),
+
+  togglePinApp: (appId) => {
+    const current = get().pinnedAppIds;
+    const next = current.includes(appId)
+      ? current.filter((id) => id !== appId)
+      : [...current, appId];
+    try {
+      localStorage.setItem('synapps_pinned_apps', JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+    set({ pinnedAppIds: next });
+  },
 
   syncApps: async () => {
     set({ error: null });
@@ -96,7 +148,13 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const current = get().apps.get(appId);
     if (!current || current.status === AppStatus.ComingSoon) return;
     set({
-      apps: updateOne(get().apps, appId, { status: AppStatus.Downloading, downloadProgress: 0 }),
+      apps: updateOne(get().apps, appId, {
+        status: AppStatus.Downloading,
+        downloadProgress: 0,
+        downloadedBytes: 0,
+        totalBytes: 0,
+        downloadSpeedBps: 0,
+      }),
       error: null,
     });
     try {
@@ -113,6 +171,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
           status: AppStatus.Installed,
           installedVersion: resolvedVersion,
           downloadProgress: undefined,
+          downloadedBytes: undefined,
+          totalBytes: undefined,
+          downloadSpeedBps: undefined,
         }),
       });
 
@@ -122,14 +183,111 @@ export const useAppStore = create<AppStore>((set, get) => ({
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       const after = get().apps.get(appId);
-      const alreadyReset = after?.status === AppStatus.NotInstalled;
+      const fallbackStatus = after?.installedVersion ? AppStatus.UpdateAvailable : AppStatus.NotInstalled;
+      if (message.includes('__CANCELLED__')) {
+        set({
+          apps: updateOne(get().apps, appId, {
+            status: fallbackStatus,
+            downloadProgress: undefined,
+            downloadedBytes: undefined,
+            totalBytes: undefined,
+            downloadSpeedBps: undefined,
+          }),
+        });
+        notify({ variant: 'info', message: i18n.t('notifications.downloadCancelled') });
+        return;
+      }
+      const alreadyReset = after?.status === fallbackStatus;
       set({
-        apps: updateOne(get().apps, appId, { status: AppStatus.NotInstalled, downloadProgress: undefined }),
+        apps: updateOne(get().apps, appId, {
+          status: fallbackStatus,
+          downloadProgress: undefined,
+          downloadedBytes: undefined,
+          totalBytes: undefined,
+          downloadSpeedBps: undefined,
+        }),
         error: message,
       });
       if (!alreadyReset) {
         notify({ variant: 'error', message });
       }
+    }
+  },
+
+  cancelAppInstall: async (appId) => {
+    try {
+      await cancelInstallCommand(appId);
+      const current = get().apps.get(appId);
+      const fallbackStatus = current?.installedVersion ? AppStatus.UpdateAvailable : AppStatus.NotInstalled;
+      set({
+        apps: updateOne(get().apps, appId, {
+          status: fallbackStatus,
+          downloadProgress: undefined,
+          downloadedBytes: undefined,
+          totalBytes: undefined,
+          downloadSpeedBps: undefined,
+        }),
+      });
+    } catch (error) {
+      console.warn('[Synapps] Failed to cancel install:', error);
+    }
+  },
+
+  updateAllApps: async () => {
+    if (get().isBatchUpdating) return;
+    const updatable = [...get().apps.values()].filter(
+      (item) => item.status === AppStatus.UpdateAvailable,
+    );
+    if (updatable.length === 0) return;
+
+    set({ isBatchUpdating: true });
+    for (const item of updatable) {
+      await get().installApp(item.app.id);
+    }
+    set({ isBatchUpdating: false });
+  },
+
+  linkAppFromDisk: async (appId) => {
+    try {
+      const res = await linkExistingApp(appId);
+      if (res) {
+        set({
+          apps: updateOne(get().apps, appId, {
+            status: AppStatus.Installed,
+            installedVersion: res.installedVersion ?? 'Sistema',
+            downloadProgress: undefined,
+          }),
+        });
+        notify({ variant: 'success', message: i18n.t('notifications.linkedExisting') });
+      }
+    } catch (error) {
+      notify({ variant: 'error', message: String(error) });
+    }
+  },
+
+  scanSystemForApps: async () => {
+    try {
+      const found = await scanSystemApps();
+      if (found.length > 0) {
+        let next = new Map(get().apps);
+        for (const item of found) {
+          next = updateOne(next, item.appId, {
+            status: AppStatus.Installed,
+            installedVersion: item.installedVersion ?? 'Sistema',
+          });
+        }
+        set({ apps: next });
+        notify({
+          variant: 'success',
+          message: i18n.t('notifications.scannedSystemFound', { count: found.length }),
+        });
+      } else {
+        notify({ variant: 'info', message: i18n.t('notifications.scannedSystemNone') });
+      }
+      return found.length;
+    } catch (error) {
+      notify({ variant: 'error', message: String(error) });
+      return 0;
     }
   },
 
@@ -156,6 +314,13 @@ export const useAppStore = create<AppStore>((set, get) => ({
   launchApp: async (appId) => {
     try {
       await launchAppCommand(appId);
+      const nextMap = { ...get().lastLaunchedMap, [appId]: Date.now() };
+      try {
+        localStorage.setItem('synapps_last_launched', JSON.stringify(nextMap));
+      } catch {
+        // ignore
+      }
+      set({ lastLaunchedMap: nextMap });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       set({ error: message });
@@ -163,12 +328,20 @@ export const useAppStore = create<AppStore>((set, get) => ({
     }
   },
 
-  updateDownloadProgress: ({ appId, progress, phase }) => {
+  updateDownloadProgress: ({ appId, progress, downloadedBytes, totalBytes, speedBps, phase }) => {
     const safeProgress = Math.min(100, Math.max(0, progress));
     let status = AppStatus.Downloading;
     if (phase === 'installing') status = AppStatus.Installing;
     if (phase === 'fallback') status = AppStatus.Fallback;
-    set({ apps: updateOne(get().apps, appId, { status, downloadProgress: safeProgress }) });
+    set({
+      apps: updateOne(get().apps, appId, {
+        status,
+        downloadProgress: safeProgress,
+        downloadedBytes,
+        totalBytes,
+        downloadSpeedBps: speedBps,
+      }),
+    });
   },
 
   setInstallComplete: ({ appId, installedVersion, latestVersion }) => {
@@ -181,6 +354,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
         installedVersion: installedVersion ?? latestVersion ?? current.latestVersion,
         latestVersion: latestVersion ?? current.latestVersion,
         downloadProgress: undefined,
+        downloadedBytes: undefined,
+        totalBytes: undefined,
+        downloadSpeedBps: undefined,
       }),
     });
     if (!alreadyMarkedInstalled) {
@@ -190,9 +366,28 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   setInstallError: ({ appId, error }) => {
     const current = get().apps.get(appId);
-    const alreadyReset = current?.status === AppStatus.NotInstalled;
+    const fallbackStatus = current?.installedVersion ? AppStatus.UpdateAvailable : AppStatus.NotInstalled;
+    if (error.includes('__CANCELLED__')) {
+      set({
+        apps: updateOne(get().apps, appId, {
+          status: fallbackStatus,
+          downloadProgress: undefined,
+          downloadedBytes: undefined,
+          totalBytes: undefined,
+          downloadSpeedBps: undefined,
+        }),
+      });
+      return;
+    }
+    const alreadyReset = current?.status === fallbackStatus;
     set({
-      apps: updateOne(get().apps, appId, { status: AppStatus.NotInstalled, downloadProgress: undefined }),
+      apps: updateOne(get().apps, appId, {
+        status: fallbackStatus,
+        downloadProgress: undefined,
+        downloadedBytes: undefined,
+        totalBytes: undefined,
+        downloadSpeedBps: undefined,
+      }),
       error,
     });
     if (!alreadyReset) {

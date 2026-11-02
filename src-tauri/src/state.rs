@@ -3,7 +3,8 @@ use reqwest::{redirect::Policy, Client};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::atomic::AtomicBool;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,6 +22,7 @@ pub struct AppState {
     pub release_cache: Mutex<HashMap<String, (Release, Instant, Option<String>)>>,
     pub version_tag_cache: Mutex<HashMap<String, (String, Instant)>>,
     pub settings: Mutex<Option<UserSettings>>,
+    pub download_cancel_flags: Mutex<HashMap<String, Arc<AtomicBool>>>,
 }
 
 fn now_secs() -> u64 {
@@ -110,6 +112,7 @@ impl AppState {
             release_cache: Mutex::new(initial_release_cache),
             version_tag_cache: Mutex::new(initial_tag_cache),
             settings: Mutex::new(None),
+            download_cancel_flags: Mutex::new(HashMap::new()),
         }
     }
 
